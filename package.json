@@ -9,23 +9,32 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "*"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "spear-viewer.helloWorld",
-        "title": "Hello World"
-      },
-      {
         "command": "spear-viewer.profile",
         "title": "Profile: Profile the energy usage of the system"
+      },
+      {
+        "command": "spear-viewer.analyze",
+        "title": "Analyze: Analyze the energy usage of the program"
       },
       {
         "command": "spear-viewer.graph",
         "title": "Spear: Generate the spear graph to a program"
       }
     ],
+    "languages": [{
+      "id": "cpp",
+      "extensions": [".cpp"]
+    }],
+    "hoverProviders": [{
+      "language": "cpp"
+    }],
     "configuration": {
       "title": "SPEAR",
       "properties": {

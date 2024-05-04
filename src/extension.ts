@@ -5,10 +5,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from "os";
 import { APPPREFIX } from './helper/extensionConstants';
-import generateGraph from './subroutines/generateGraph';
+import generateGraph, { GenerateGraphParameters } from './subroutines/generateGraph';
 import profile from './subroutines/profile';
+import { triggerDecorationUpdate } from './subroutines/decorationHandler';
+import analyzeHandler from './subroutines/analyzeHandler';
 
 export let TMPDIR: string = "";
+
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -21,13 +24,15 @@ export function activate(context: vscode.ExtensionContext) {
 		// This line of code will only be executed once when your extension is activated
 		console.log('Spear-viewer active!');
 
+		let activeEditor = vscode.window.activeTextEditor;
+
 		
 		context.subscriptions.push(
 			/**
 			 * Command to generate the graph for the currently open editor
 			 */
-			vscode.commands.registerCommand('spear-viewer.graph', async () => {
-				generateGraph();
+			vscode.commands.registerCommand('spear-viewer.graph', async (params: GenerateGraphParameters) => {
+				generateGraph(params);
 			}),
 
 			/**
@@ -36,8 +41,32 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.registerCommand('spear-viewer.profile', async () => {
 				// [TODO]: Validate config here
 				profile();
-			})
+			}),
+
+			vscode.commands.registerCommand('spear-viewer.analyze', async () => {
+				analyzeHandler();
+			}),
 		);
+
+
+		if (activeEditor) {
+			triggerDecorationUpdate(true, activeEditor);
+		}
+
+		vscode.window.onDidChangeActiveTextEditor(editor => {
+			activeEditor = editor;
+			if (editor) {
+				triggerDecorationUpdate(false, activeEditor);
+			}
+		}, null, context.subscriptions);
+	
+		vscode.workspace.onDidChangeTextDocument(event => {
+			if (activeEditor && event.document === activeEditor.document) {
+				triggerDecorationUpdate(true, activeEditor);
+			}
+		}, null, context.subscriptions);
+
+
 	}catch(e){
 		console.error(e);
 		vscode.window.showErrorMessage('Error activating spear. A temporary directory could not be created!');
