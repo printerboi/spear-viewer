@@ -9,15 +9,52 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "*"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "spear-viewer.helloWorld",
-        "title": "Hello World"
+        "command": "spear-viewer.profile",
+        "title": "Profile: Profile the energy usage of the system"
+      },
+      {
+        "command": "spear-viewer.analyze",
+        "title": "Analyze: Analyze the energy usage of the program"
+      },
+      {
+        "command": "spear-viewer.graph",
+        "title": "Spear: Generate the spear graph to a program"
       }
-    ]
+    ],
+    "languages": [{
+      "id": "cpp",
+      "extensions": [".cpp"]
+    }],
+    "hoverProviders": [{
+      "language": "cpp"
+    }],
+    "configuration": {
+      "title": "SPEAR",
+      "properties": {
+        "spear-viewer.apppath": {
+          "type": "string",
+          "default": "/usr/bin/spear",
+          "description": "Path to the spear executeable"
+        },
+        "spear-viewer.profile.programspath": {
+          "type": "string",
+          "default": "/usr/share/spear/profile",
+          "description": "Path to the programs used by spear to profile the system"
+        },
+        "spear-viewer.profile.iterations": {
+          "type": "number",
+          "default": 10000,
+          "description": "Amount of repeated measurements during profiling. Higher values increase the accuracy of the measurement but will increase the runtime of the profiling (depending on the performance of your system)"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -31,17 +68,20 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.87.0",
     "@types/mocha": "^10.0.6",
-    "@types/node": "18.x",
+    "@types/node": "^18.19.31",
+    "@types/vscode": "^1.87.0",
     "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.4.0",
-    "eslint": "^8.57.0",
-    "typescript": "^5.3.3",
-    "ts-loader": "^9.5.1",
-    "webpack": "^5.91.0",
-    "webpack-cli": "^5.1.4",
     "@vscode/test-cli": "^0.0.8",
-    "@vscode/test-electron": "^2.3.9"
+    "@vscode/test-electron": "^2.3.9",
+    "eslint": "^8.57.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@vscode/sudo-prompt": "^9.3.1"
   }
 }
