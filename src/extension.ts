@@ -9,6 +9,7 @@ import generateGraph, { GenerateGraphParameters } from './subroutines/generateGr
 import profile from './subroutines/profile';
 import { triggerDecorationUpdate } from './subroutines/decorationHandler';
 import analyzeHandler from './subroutines/analyzeHandler';
+import { energyEditorProvider } from './editors/virtualEnergyEditor';
 
 export let TMPDIR: string = "";
 
@@ -46,6 +47,8 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.registerCommand('spear-viewer.analyze', async () => {
 				analyzeHandler();
 			}),
+
+			vscode.workspace.registerTextDocumentContentProvider("spearenergy", energyEditorProvider)
 		);
 
 

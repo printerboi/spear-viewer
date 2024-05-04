@@ -28,13 +28,6 @@
         "title": "Spear: Generate the spear graph to a program"
       }
     ],
-    "languages": [{
-      "id": "cpp",
-      "extensions": [".cpp"]
-    }],
-    "hoverProviders": [{
-      "language": "cpp"
-    }],
     "configuration": {
       "title": "SPEAR",
       "properties": {
