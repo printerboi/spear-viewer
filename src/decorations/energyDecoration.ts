@@ -110,10 +110,13 @@ export class AnalysisDecorationWrapper {
                     if(inst.location.file === this.relevantFile){
                         // Aggregate the energy if the line was referenced previously.
                         // This ensures, that we add the energy value if a line contains multiple instructions
-                        if(!this.lineEnergyMapping[inst.location.line]){
-                            this.lineEnergyMapping[inst.location.line] = inst.energy;
+
+                        // We need to substract 1 here, as clang outputs its debug info starting at column 1
+                        // Vscode starts its line numbering at 0...
+                        if(!this.lineEnergyMapping[inst.location.line-1]){
+                            this.lineEnergyMapping[inst.location.line-1] = inst.energy;
                         }else{
-                            this.lineEnergyMapping[inst.location.line] += inst.energy;
+                            this.lineEnergyMapping[inst.location.line-1] += inst.energy;
                         }
                     }
                 });

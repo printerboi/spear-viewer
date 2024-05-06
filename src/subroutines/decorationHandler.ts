@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { graphDecorationType } from '../decorations/graphDecoration';
 import { AnalysisDecorationWrapper, AnalysisResult } from '../decorations/energyDecoration';
 import qs from 'querystring';
-import { error } from 'console';
 
 export let timeout: ReturnType<typeof setTimeout> | undefined = undefined;
 
