@@ -49,7 +49,8 @@ export async function updateDecorations(activeEditor: vscode.TextEditor | undefi
                     }
                 }
             }catch(e){
-                console.error("Analysis could not be parsed")
+                console.error(e);
+                console.error("Analysis could not be parsed");
             }
         }
     }

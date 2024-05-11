@@ -1,6 +1,12 @@
 import * as vscode from 'vscode';
 import { BADCOLOR, Color, GOODCOLOR, MEDIUMCOLOR, interpolate } from '../helper/colorHelper';
 
+enum NodeType {
+    UNDEFINED = 0,
+    NODE = 1,
+    LOOPNODE = 2
+}
+
 /**
  * Stores the DebugLoc Information provided by LLVM
  */
@@ -24,7 +30,18 @@ interface EnergyInstruction {
  */
 interface EnergyNode{
     energy: number,
+    type: NodeType,
     instructions: Array<EnergyInstruction>
+}
+
+interface Subgraph { 
+    nodes: Array<EnergyNode | EnergyLoopNode>
+}
+
+interface EnergyLoopNode{
+    type: NodeType,
+    repetitions: number,
+    subgraphs: Array<Subgraph>
 }
 
 /**
@@ -33,7 +50,7 @@ interface EnergyNode{
 interface EnergyFunction {
     demangled: string,
     name: string,
-    nodes: Array<EnergyNode>,
+    nodes: Array<EnergyNode | EnergyLoopNode>,
 }
 
 /**
@@ -100,35 +117,64 @@ export class AnalysisDecorationWrapper {
      * the relevantFile property of the object.
      */
     parse(){
+        //[TODO] We need to find a way that lines don't contain the doubled value of energy
+        // Currently the function will be calculated two times...the devil knows why...
+
+
         // Iterate over the EnergyFunction objects
         this.energyJson.functions.forEach((func) => {
             // Iterate over the contained EnergyNodes of the Energyfunction
-            func.nodes.forEach((node: EnergyNode) => {
-                // Iterate over the contained EnergyInstruction objects
-                node.instructions.forEach((inst: EnergyInstruction) => {
-                    // If the locations file corresponds to the provided relevantFile, handle the saved energy in the instruction
-                    if(inst.location.file === this.relevantFile){
-                        // Aggregate the energy if the line was referenced previously.
-                        // This ensures, that we add the energy value if a line contains multiple instructions
-
-                        // We need to substract 1 here, as clang outputs its debug info starting at column 1
-                        // Vscode starts its line numbering at 0...
-                        if(!this.lineEnergyMapping[inst.location.line-1]){
-                            this.lineEnergyMapping[inst.location.line-1] = inst.energy;
-                        }else{
-                            this.lineEnergyMapping[inst.location.line-1] += inst.energy;
-                        }
-                    }
-                });
+            func.nodes.forEach((node: EnergyNode | EnergyLoopNode) => {
+                this.parseNode(node);
             });
         });
-        
+
         // Iterate over the mapping and determine the biggest value
         // The biggest value is used to calculate the color interpolation
         this.lineEnergyMapping.forEach((lem) => {
             if(lem > this.maxVal){
                 this.maxVal = lem;
             }
+        });
+    }
+
+    parseNode(node: EnergyNode | EnergyLoopNode, multiplier: number = 1){
+        if(node.type === 1){
+            const normalnode = node as EnergyNode;
+            this.parseNormalNode(normalnode, multiplier);
+        }else if(node.type === 2){
+            const loopnode = node as EnergyLoopNode;
+            this.parseLoopNode(loopnode, multiplier);
+        }else{
+            throw Error("Node state undefined!");
+        }
+    }
+
+    parseNormalNode(normalnode: EnergyNode, multiplier: number = 1){
+        // Iterate over the contained EnergyInstruction objects
+        normalnode.instructions.forEach((inst: EnergyInstruction) => {
+            // If the locations file corresponds to the provided relevantFile, handle the saved energy in the instruction
+            if(inst.location.file === this.relevantFile){
+                // Aggregate the energy if the line was referenced previously.
+                // This ensures, that we add the energy value if a line contains multiple instructions
+
+                // We need to substract 1 here, as clang outputs its debug info starting at column 1
+                // Vscode starts its line numbering at 0...
+                const val = multiplier * inst.energy;
+                if(!this.lineEnergyMapping[inst.location.line-1]){
+                    this.lineEnergyMapping[inst.location.line-1] = val;
+                }else{
+                    this.lineEnergyMapping[inst.location.line-1] += val;
+                }
+            }
+        });
+    }
+
+    parseLoopNode(loopnode: EnergyLoopNode, multiplier: number = 1){
+        loopnode.subgraphs.forEach((subgraph: Subgraph) => {
+            subgraph.nodes.forEach((node: EnergyNode | EnergyLoopNode) => {
+                this.parseNode(node, multiplier * loopnode.repetitions);
+            });
         });
     }
 
