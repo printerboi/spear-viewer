@@ -47,6 +47,23 @@
           "description": "Amount of repeated measurements during profiling. Higher values increase the accuracy of the measurement but will increase the runtime of the profiling (depending on the performance of your system)"
         }
       }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "spearviewersidebar",
+          "title": "SPEAR",
+          "icon": "media/lightning.svg"
+        }
+      ]
+    },
+    "views": {
+      "spearviewersidebar": [
+        {
+            "id": "spear_sidebar_overview",
+            "name": "overview"
+        }
+      ]
     }
   },
   "scripts": {

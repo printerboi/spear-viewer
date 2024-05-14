@@ -35,6 +35,7 @@ export default async function profile() {
                     await exec(`pkexec ${APPPATH} profile --iterations ${ITERATIONS} --model ${PROGRAMMSPATH} --savelocation ${TMPDIR}`);
                 }catch(profilingError){
                     // If the command fails, or the rights elevation failed, reject the promise
+                    console.error(profilingError);
                     reject();
                 }				
                 // After the profiling resolve the promise

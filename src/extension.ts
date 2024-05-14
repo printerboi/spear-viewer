@@ -51,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
 			/**
 			 * Opens a readonly editor and display the code with energy highlighting
 			 */
-			vscode.workspace.registerTextDocumentContentProvider("spearenergy", energyEditorProvider)
+			vscode.workspace.registerTextDocumentContentProvider("spearenergy", energyEditorProvider),
 		);
 
 
