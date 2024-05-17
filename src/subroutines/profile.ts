@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { TMPDIR } from '../extension';
+import { ProfileProvider, TMPDIR } from '../extension';
 import util from 'util';
 import { APPPATH, ITERATIONS, PROGRAMMSPATH } from '../helper/extensionConstants';
 
@@ -48,6 +48,7 @@ export default async function profile() {
             () => {
                 // If the profiling operation succeeds
                 vscode.window.showInformationMessage("Profiling finished! ⚡");
+                ProfileProvider.refresh();
             },
             () => {
                 // If the profiling fails

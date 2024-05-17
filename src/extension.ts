@@ -10,8 +10,11 @@ import profile from './subroutines/profile';
 import { triggerDecorationUpdate } from './subroutines/decorationHandler';
 import analyzeHandler from './subroutines/analyzeHandler';
 import { energyEditorProvider } from './editors/virtualEnergyEditor';
+import { SpearSidebarViewProvider } from './sidebar/SpearSidebarViewProvider';
+import { SpearSidebarProfileProvider } from './sidebar/SpearSidebarProfileView';
 
 export let TMPDIR: string = "";
+export const ProfileProvider = new SpearSidebarProfileProvider();
 
 
 // This method is called when your extension is activated
@@ -26,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
 		console.log('Spear-viewer active!');
 
 		let activeEditor = vscode.window.activeTextEditor;
-
+		const OverviewProvider = new SpearSidebarViewProvider(context.extensionUri);
 		
 		context.subscriptions.push(
 			/**
@@ -35,6 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.registerCommand('spear-viewer.graph', async (params: GenerateGraphParameters) => {
 				generateGraph(params);
 			}),
+			
 
 			/**
 			 * Profiles the device and saves the generated profile in the tempory directory of the application
@@ -47,6 +51,14 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.registerCommand('spear-viewer.analyze', async () => {
 				analyzeHandler();
 			}),
+
+			vscode.window.registerWebviewViewProvider(SpearSidebarViewProvider.viewType, OverviewProvider),
+
+			vscode.window.registerTreeDataProvider("spearsidebar.profile", ProfileProvider),
+
+			vscode.commands.registerCommand('spear-viewer.profile.refreshEntry', () =>
+				ProfileProvider.refresh()
+			),
 
 			/**
 			 * Opens a readonly editor and display the code with energy highlighting

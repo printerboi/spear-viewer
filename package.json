@@ -17,7 +17,11 @@
     "commands": [
       {
         "command": "spear-viewer.profile",
-        "title": "Profile: Profile the energy usage of the system"
+        "title": "Profile: Profile the energy usage of the system",
+        "icon": {
+          "light": "media/icons/light/download.svg",
+          "dark": "media/icons/dark/download.svg"
+      }
       },
       {
         "command": "spear-viewer.analyze",
@@ -26,8 +30,30 @@
       {
         "command": "spear-viewer.graph",
         "title": "Spear: Generate the spear graph to a program"
+      },
+      {
+        "command": "spear-viewer.profile.refreshEntry",
+        "title": "Spear: Reload Profile",
+        "icon": {
+            "light": "media/icons/light/reload.svg",
+            "dark": "media/icons/dark/reload.svg"
+        }
       }
     ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "spear-viewer.profile.refreshEntry",
+          "when": "view == spearsidebar.profile",
+          "group": "navigation"
+        },
+        {
+          "command": "spear-viewer.profile",
+          "when": "view == spearsidebar.profile",
+          "group": "navigation"
+        }
+      ]
+    },
     "configuration": {
       "title": "SPEAR",
       "properties": {
@@ -60,8 +86,14 @@
     "views": {
       "spearviewersidebar": [
         {
-            "id": "spear_sidebar_overview",
+            "type": "webview",
+            "id": "spearsidebar.overview",
             "name": "overview"
+        },
+        {
+          "type": "tree",
+          "id": "spearsidebar.profile",
+          "name": "Profile"
         }
       ]
     }
