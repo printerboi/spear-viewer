@@ -56,19 +56,19 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 		if (activeEditor) {
-			triggerDecorationUpdate(true, activeEditor);
+			triggerDecorationUpdate(true, activeEditor, context);
 		}
 
 		vscode.window.onDidChangeActiveTextEditor(editor => {
 			activeEditor = editor;
 			if (editor) {
-				triggerDecorationUpdate(false, activeEditor);
+				triggerDecorationUpdate(false, activeEditor, context);
 			}
 		}, null, context.subscriptions);
 	
 		vscode.workspace.onDidChangeTextDocument(event => {
 			if (activeEditor && event.document === activeEditor.document) {
-				triggerDecorationUpdate(true, activeEditor);
+				triggerDecorationUpdate(true, activeEditor, context);
 			}
 		}, null, context.subscriptions);
 

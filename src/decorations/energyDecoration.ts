@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { BADCOLOR, Color, GOODCOLOR, MEDIUMCOLOR, interpolate } from '../helper/colorHelper';
+import path from 'path';
 
 enum NodeType {
     UNDEFINED = 0,
@@ -89,19 +90,23 @@ export class AnalysisDecorationWrapper {
      */
     maxVal: number;
 
+    context: vscode.ExtensionContext
+
 
     /**
      * 
      * @param engjsn 
      * @param relevantFile 
      */
-    constructor(engjsn: any, relevantFile: string){
+    constructor(engjsn: any, relevantFile: string, context: vscode.ExtensionContext){
         // Intialize the analysis result and the relevant file for the wrapper
         this.energyJson = engjsn;
         this.relevantFile = relevantFile;
 
         // Initialize the line -> energy usage mapping as empty numbers array
         this.lineEnergyMapping = Array<number>();
+
+        this.context =  context;
 
         // Set the maxval to 0, as we don't except negative energy values, 0 is the lowest value that can occur
         this.maxVal = 0;
@@ -186,13 +191,8 @@ export class AnalysisDecorationWrapper {
     getDecoration(lineNumber: number): vscode.DecorationRenderOptions{
         // Get the color and the used energy with the helper methods and the provided linenumber
         return {
-            backgroundColor: this.getColor(lineNumber),
             isWholeLine: true,
-            after: {
-                contentText: this.getEnergyAsString(lineNumber),
-                margin: "0px 0px 0px 100px",
-                color: "lightgrey",
-            }
+            gutterIconPath: this.getGutterIcon(lineNumber),
         };
     }
 
@@ -205,7 +205,7 @@ export class AnalysisDecorationWrapper {
         // If the provided line is valid and we have a energy value for this line
         if(lineNumber && this.lineEnergyMapping[lineNumber]){
             // Return the energy postfixed with the unit joule
-            return `${this.lineEnergyMapping[lineNumber].toString()} J`;
+            return `${this.lineEnergyMapping[lineNumber].toFixed(3).toString()} J`;
         }
 
         // In any other case return an empty string
@@ -230,6 +230,14 @@ export class AnalysisDecorationWrapper {
             return `rgba(0, 0, 0, 0.0)`;
         }
 
-        return `rgba(${interpolatedColor.red}, ${interpolatedColor.green}, ${interpolatedColor.blue}, 0.3)`;
+        return `rgba(${interpolatedColor.red}, ${interpolatedColor.green}, ${interpolatedColor.blue}, 0.7)`;
+    }
+
+
+    getGutterIcon(lineNumber: number): vscode.Uri{
+        //const svg = '<svg width="32" height="48" viewPort="0 0 32 48" xmlns="http://www.w3.org/2000/svg"><polygon points="16,0 32,0 32,48 16,48" fill="' + this.getColor(lineNumber) + '" stroke="white" stroke-width="4"/></svg>';
+        const svg = `<svg width="10" height="15" viewBox="0 0 10 15" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="10" height="10" fill="${this.getColor(lineNumber)}" stroke="white" stroke-width="0"/></svg>`;
+        const icon = 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
+        return vscode.Uri.parse(icon);
     }
 }

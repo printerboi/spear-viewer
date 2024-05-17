@@ -10,7 +10,7 @@ export let timeout: ReturnType<typeof setTimeout> | undefined = undefined;
  * Updates the decorations for the given vscode TextEditor
  * @param activeEditor TextEditor the decorations should be updated for
  */
-export async function updateDecorations(activeEditor: vscode.TextEditor | undefined) {
+export async function updateDecorations(activeEditor: vscode.TextEditor | undefined, context: vscode.ExtensionContext) {
     // Check if the given editor is valid, return otherwise
     if(!activeEditor){
         return;
@@ -37,15 +37,22 @@ export async function updateDecorations(activeEditor: vscode.TextEditor | undefi
                 // If the parsing worked
                 if(energyJson){
                     // Construct the AnalysisDecorationWrapper with the energyjson and the path of the currently open file
-                    const decWrapper = new AnalysisDecorationWrapper(energyJson, activeEditor.document.fileName);
+                    const decWrapper = new AnalysisDecorationWrapper(energyJson, activeEditor.document.fileName, context);
 
                     // Iterate over the lines of the document
                     for(let i = 0; i < activeEditor.document.lineCount; i++){
                         // Construct a decoration for this line
-                        const decoration = { range: new vscode.Range(i, 0, i, 0) };
+                        let hoverMessage = undefined;
+                        const energyAsString = decWrapper.getEnergyAsString(i);
+                        if(energyAsString !== ""){
+                            hoverMessage = new vscode.MarkdownString(`${decWrapper.getEnergyAsString(i)} J`);
 
-                        // Activate the decoration and get the RenderOptions with the wrapper
-                        activeEditor.setDecorations(vscode.window.createTextEditorDecorationType(decWrapper.getDecoration(i)), [decoration]);
+                            const decoration = { range: new vscode.Range(i, 0, i, 0), hoverMessage: hoverMessage };
+
+                            // Activate the decoration and get the RenderOptions with the wrapper
+                            activeEditor.setDecorations(vscode.window.createTextEditorDecorationType(decWrapper.getDecoration(i)), [decoration]);
+                        }
+                        
                     }
                 }
             }catch(e){
@@ -83,15 +90,15 @@ export async function updateDecorations(activeEditor: vscode.TextEditor | undefi
     }
 }
 
-export function triggerDecorationUpdate(throttle = false, activeEditor: vscode.TextEditor | undefined) {
+export function triggerDecorationUpdate(throttle = false, activeEditor: vscode.TextEditor | undefined, context: vscode.ExtensionContext) {
     if(timeout){
         clearTimeout(timeout);
         timeout = undefined;
     }
 
     if(throttle){
-        timeout = setTimeout(() => { updateDecorations(activeEditor); }, 1000);
+        timeout = setTimeout(() => { updateDecorations(activeEditor, context); }, 1000);
     }else{
-        updateDecorations(activeEditor);
+        updateDecorations(activeEditor, context);
     }
 }
