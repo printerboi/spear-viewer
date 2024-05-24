@@ -88,6 +88,22 @@
           "type": "number",
           "default": 0,
           "description": "Defines a threshhold after which energy usage is highlighted. Any energy usage below this value will not be highlighted!"
+        },
+        "spear-viewer.analyze.loopbound": {
+          "type": "number",
+          "default": 100,
+          "description": "The value that approximates the number of loop iterations when the number of repetitions cannot be statically determined."
+        },
+        "spear-viewer.analyze.strategy": {
+          "type": "string",
+          "default": "worst",
+          "enum": ["worst", "average", "best"],
+          "description": "Defines a the analysis strategy used by spear.",
+          "enumDescriptions": [
+            "Conducts a worst-case analysis by always selecting the path with the highest energy contribution when multiple paths are available.",
+            "Conducts an average-case analysis by balancing paths with the highest and lowest energy usage.",
+            "Conducts a best-case analysis by always selecting the path with the smallest energy contribution when multiple paths are available."
+          ]
         }
       }
     },
