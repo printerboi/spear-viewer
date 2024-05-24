@@ -80,7 +80,7 @@ class ProfileItem extends vscode.TreeItem {
     if(isErrorMsg){
         this.description = "Please generate one first!";
     }else{
-        this.description = this.energy.toFixed(3);
+        this.description = `${this.energy.toFixed(3)} J`;
     }
   }
 

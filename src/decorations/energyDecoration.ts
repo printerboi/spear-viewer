@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { BADCOLOR, Color, GOODCOLOR, MEDIUMCOLOR, interpolate } from '../helper/colorHelper';
-import path from 'path';
+import { SETTINGS } from '../helper/extensionConstants';
+
 
 enum NodeType {
     UNDEFINED = 0,
@@ -90,7 +91,7 @@ export class AnalysisDecorationWrapper {
      */
     maxVal: number;
 
-    context: vscode.ExtensionContext
+    context: vscode.ExtensionContext;
 
 
     /**
@@ -205,7 +206,7 @@ export class AnalysisDecorationWrapper {
         // If the provided line is valid and we have a energy value for this line
         if(lineNumber && this.lineEnergyMapping[lineNumber]){
             // Return the energy postfixed with the unit joule
-            return `${this.lineEnergyMapping[lineNumber].toFixed(3).toString()} J`;
+            return `${this.lineEnergyMapping[lineNumber].toFixed(3).toString()}`;
         }
 
         // In any other case return an empty string
@@ -225,7 +226,7 @@ export class AnalysisDecorationWrapper {
                 interpolatedColor = interpolate(GOODCOLOR, MEDIUMCOLOR, this.lineEnergyMapping[lineNumber]/(this.maxVal/2));
             }else{
                 interpolatedColor = interpolate(MEDIUMCOLOR, BADCOLOR, (this.lineEnergyMapping[lineNumber] - this.maxVal/2)/(this.maxVal/2));
-            }
+            }    
         }else{
             return `rgba(0, 0, 0, 0.0)`;
         }
@@ -234,10 +235,16 @@ export class AnalysisDecorationWrapper {
     }
 
 
-    getGutterIcon(lineNumber: number): vscode.Uri{
-        //const svg = '<svg width="32" height="48" viewPort="0 0 32 48" xmlns="http://www.w3.org/2000/svg"><polygon points="16,0 32,0 32,48 16,48" fill="' + this.getColor(lineNumber) + '" stroke="white" stroke-width="4"/></svg>';
-        const svg = `<svg width="10" height="15" viewBox="0 0 10 15" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="10" height="10" fill="${this.getColor(lineNumber)}" stroke="white" stroke-width="0"/></svg>`;
-        const icon = 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
-        return vscode.Uri.parse(icon);
+    getGutterIcon(lineNumber: number): vscode.Uri | undefined{
+        const THRESHOLD = SETTINGS.getTHRESHOLD();
+
+        if(THRESHOLD !== undefined){
+            if(this.lineEnergyMapping[lineNumber] > THRESHOLD){
+                //const svg = '<svg width="32" height="48" viewPort="0 0 32 48" xmlns="http://www.w3.org/2000/svg"><polygon points="16,0 32,0 32,48 16,48" fill="' + this.getColor(lineNumber) + '" stroke="white" stroke-width="4"/></svg>';
+                const svg = `<svg width="10" height="15" viewBox="0 0 10 15" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="10" height="10" fill="${this.getColor(lineNumber)}" stroke="white" stroke-width="0"/></svg>`;
+                const icon = 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
+                return vscode.Uri.parse(icon);
+            }
+        }
     }
 }

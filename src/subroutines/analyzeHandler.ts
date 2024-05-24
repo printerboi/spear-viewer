@@ -3,12 +3,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { TMPDIR } from '../extension';
 import util from 'util';
-import { APPPATH } from '../helper/extensionConstants';
+import { SETTINGS } from "../helper/extensionConstants";
 const exec = util.promisify(require('child_process').exec);
 
 
 export default async function analyzeHandler() {
     let activeEditor = vscode.window.activeTextEditor;
+    const APPPATH = SETTINGS.getAPPPATH();
 
     
     if(activeEditor){

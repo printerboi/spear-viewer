@@ -19,13 +19,17 @@
         "command": "spear-viewer.profile",
         "title": "Profile: Profile the energy usage of the system",
         "icon": {
-          "light": "media/icons/light/download.svg",
-          "dark": "media/icons/dark/download.svg"
+          "light": "media/icons/light/play-circle.svg",
+          "dark": "media/icons/dark/play-circle.svg"
       }
       },
       {
         "command": "spear-viewer.analyze",
-        "title": "Analyze: Analyze the energy usage of the program"
+        "title": "Analyze: Analyze the energy usage of the program",
+        "icon": {
+          "light": "media/icons/light/analyze.svg",
+          "dark": "media/icons/dark/analyze.svg"
+        }
       },
       {
         "command": "spear-viewer.graph",
@@ -52,7 +56,15 @@
           "when": "view == spearsidebar.profile",
           "group": "navigation"
         }
-      ]
+      ],
+      "editor/title": [
+        {
+            "command": "spear-viewer.analyze",
+            "when": "editorLangId == cpp",
+            "alt": "markdown.showPreview",
+            "group": "navigation"
+        }
+    ]
     },
     "configuration": {
       "title": "SPEAR",
@@ -71,6 +83,11 @@
           "type": "number",
           "default": 10000,
           "description": "Amount of repeated measurements during profiling. Higher values increase the accuracy of the measurement but will increase the runtime of the profiling (depending on the performance of your system)"
+        },
+        "spear-viewer.analyze.threshold": {
+          "type": "number",
+          "default": 0,
+          "description": "Defines a threshhold after which energy usage is highlighted. Any energy usage below this value will not be highlighted!"
         }
       }
     },

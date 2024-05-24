@@ -69,12 +69,7 @@ export class SpearSidebarViewProvider implements vscode.WebviewViewProvider {
 				<title>Spear Overview</title>
 			</head>
 			<body>
-                <div class="settingscontainer">
-                    <div class="settingrow">
-                        <span class="settingname">Energy Threshold:</span>
-                        <input class="settinginput" type="number" id="energy-threshold">
-                    </div>
-                </div>
+                
 
 			</body>
 			</html>`;

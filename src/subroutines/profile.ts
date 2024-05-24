@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { ProfileProvider, TMPDIR } from '../extension';
 import util from 'util';
-import { APPPATH, ITERATIONS, PROGRAMMSPATH } from '../helper/extensionConstants';
+import { SETTINGS } from '../helper/extensionConstants';
 
 const exec = util.promisify(require('child_process').exec);
 
@@ -11,6 +11,12 @@ const exec = util.promisify(require('child_process').exec);
  * Profile the system 
  */
 export default async function profile() {
+    const APPPATH = SETTINGS.getAPPPATH();
+    const ITERATIONS = SETTINGS.getITERATIONS();
+    const PROGRAMMSPATH = SETTINGS.getPROGRAMMSPATH();
+
+
+
     // Remove a previously generated profile if present
     if(fs.existsSync(`${TMPDIR}/profile.json`)){
         fs.rmSync(`${TMPDIR}/profile.json`);

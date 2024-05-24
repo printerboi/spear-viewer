@@ -78,7 +78,7 @@ export async function updateDecorations(activeEditor: vscode.TextEditor | undefi
             if(parsedName){
                 const graphCommandUri = vscode.Uri.parse(`command:spear-viewer.graph?${encodeURIComponent(JSON.stringify({ functionname: parsedName }))}`);
 
-                const hoverMessage = new vscode.MarkdownString(`[📈 Show energy graph](${graphCommandUri}) **|** [⚡ Calculate energy usage](#)`);
+                const hoverMessage = new vscode.MarkdownString(`[📈 Show energy graph](${graphCommandUri})`);
                 hoverMessage.isTrusted = true;
 
                 const decoration = { range: new vscode.Range(symbol.location.range.start, new vscode.Position(symbol.location.range.start.line, 10)), hoverMessage: hoverMessage };

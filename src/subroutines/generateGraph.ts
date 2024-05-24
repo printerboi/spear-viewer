@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { TMPDIR } from '../extension';
 import util from 'util';
-import { APPPATH } from '../helper/extensionConstants';
+import { SETTINGS } from '../helper/extensionConstants';
 
 const exec = util.promisify(require('child_process').exec);
 
@@ -17,6 +17,7 @@ export interface GenerateGraphParameters {
  */
 export default async function generateGraph(params: GenerateGraphParameters) {
     // [TODO]: Validate config here
+    const APPPATH = SETTINGS.getAPPPATH();
 
     // Check if the user has an open text editor
     if(vscode.window.activeTextEditor !== undefined){
