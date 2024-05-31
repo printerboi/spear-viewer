@@ -13,7 +13,10 @@ import { energyEditorProvider } from './editors/virtualEnergyEditor';
 import { SpearSidebarViewProvider } from './sidebar/SpearSidebarViewProvider';
 import { SpearSidebarProfileProvider } from './sidebar/SpearSidebarProfileView';
 
-export let TMPDIR: string = "";
+//export let TMPDIR: string = "";
+export let PROJECTDIR: string = "";
+export let CONFIGPATH: string = "";
+export let CONFIGLOCATION: string = "";
 export const ProfileProvider = new SpearSidebarProfileProvider();
 
 
@@ -22,7 +25,7 @@ export const ProfileProvider = new SpearSidebarProfileProvider();
 export function activate(context: vscode.ExtensionContext) {
 	console.log("Creating tmp dir...");
 	try {
-		TMPDIR = fs.mkdtempSync(path.join(os.tmpdir(), APPPREFIX));
+		//TMPDIR = fs.mkdtempSync(path.join(os.tmpdir(), APPPREFIX));
 		
 		// Use the console to output diagnostic information (console.log) and errors (console.error)
 		// This line of code will only be executed once when your extension is activated
@@ -30,42 +33,63 @@ export function activate(context: vscode.ExtensionContext) {
 
 		let activeEditor = vscode.window.activeTextEditor;
 		const OverviewProvider = new SpearSidebarViewProvider(context.extensionUri);
-		
-		context.subscriptions.push(
-			/**
-			 * Command to generate the graph for the currently open editor
-			 */
-			vscode.commands.registerCommand('spear-viewer.graph', async (params: GenerateGraphParameters) => {
-				generateGraph(params);
-			}),
+
+		if(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0){
+			CONFIGPATH = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/spear.yml`;
+			PROJECTDIR = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.spear`;
+			CONFIGLOCATION = `${vscode.workspace.workspaceFolders[0].uri.fsPath}`;
+
+			if(!fs.existsSync(CONFIGPATH)){
+				vscode.window.showInformationMessage('No spear config file was provided. Please create one first!', "Create", "Later...")
+				.then((value) => {
+					console.log(value);
+					if(value === "Create"){
+						const projectFileStream = fs.createWriteStream(CONFIGPATH);
+
+						const sampleConfig = fs.readFileSync(`${context.extensionPath}/util/sample.config.yml`);
+						projectFileStream.write(sampleConfig);
+						projectFileStream.end();
+						fs.mkdirSync(PROJECTDIR);
+						vscode.window.showInformationMessage("Spear config created!");
+					}
+				});
+			}
 			
-
-			/**
-			 * Profiles the device and saves the generated profile in the tempory directory of the application
-			 */
-			vscode.commands.registerCommand('spear-viewer.profile', async () => {
-				// [TODO]: Validate config here
-				profile();
-			}),
-
-			vscode.commands.registerCommand('spear-viewer.analyze', async () => {
-				analyzeHandler();
-			}),
-
-			vscode.window.registerWebviewViewProvider(SpearSidebarViewProvider.viewType, OverviewProvider),
-
-			vscode.window.registerTreeDataProvider("spearsidebar.profile", ProfileProvider),
-
-			vscode.commands.registerCommand('spear-viewer.profile.refreshEntry', () =>
-				ProfileProvider.refresh()
-			),
-
-			/**
-			 * Opens a readonly editor and display the code with energy highlighting
-			 */
-			vscode.workspace.registerTextDocumentContentProvider("spearenergy", energyEditorProvider),
-		);
-
+			context.subscriptions.push(
+				/**
+				 * Command to generate the graph for the currently open editor
+				 */
+				vscode.commands.registerCommand('spear-viewer.graph', async (params: GenerateGraphParameters) => {
+					generateGraph(params);
+				}),
+				
+	
+				/**
+				 * Profiles the device and saves the generated profile in the tempory directory of the application
+				 */
+				vscode.commands.registerCommand('spear-viewer.profile', async () => {
+					// [TODO]: Validate config here
+					profile();
+				}),
+	
+				vscode.commands.registerCommand('spear-viewer.analyze', async () => {
+					analyzeHandler();
+				}),
+	
+				vscode.window.registerWebviewViewProvider(SpearSidebarViewProvider.viewType, OverviewProvider),
+	
+				vscode.window.registerTreeDataProvider("spearsidebar.profile", ProfileProvider),
+	
+				vscode.commands.registerCommand('spear-viewer.profile.refreshEntry', () =>
+					ProfileProvider.refresh()
+				),
+	
+				/**
+				 * Opens a readonly editor and display the code with energy highlighting
+				 */
+				vscode.workspace.registerTextDocumentContentProvider("spearenergy", energyEditorProvider),
+			);
+		}
 
 		if (activeEditor) {
 			triggerDecorationUpdate(true, activeEditor, context);
@@ -95,12 +119,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 // This method is called when your extension is deactivated
 export function deactivate() {
-	try {
+	/* try {
 		if (TMPDIR) {
 			fs.rmSync(TMPDIR, { recursive: true });
 		}
 	}
 	catch (e) {
 		vscode.window.showInformationMessage(`An error has occurred while removing the temporary directory at ${TMPDIR}. Please remove it manually. Error: ${e}`);
-	}
+	} */
 }

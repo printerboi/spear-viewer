@@ -21,7 +21,7 @@
         "icon": {
           "light": "media/icons/light/play-circle.svg",
           "dark": "media/icons/dark/play-circle.svg"
-      }
+        }
       },
       {
         "command": "spear-viewer.analyze",
@@ -39,8 +39,8 @@
         "command": "spear-viewer.profile.refreshEntry",
         "title": "Spear: Reload Profile",
         "icon": {
-            "light": "media/icons/light/reload.svg",
-            "dark": "media/icons/dark/reload.svg"
+          "light": "media/icons/light/reload.svg",
+          "dark": "media/icons/dark/reload.svg"
         }
       }
     ],
@@ -59,12 +59,12 @@
       ],
       "editor/title": [
         {
-            "command": "spear-viewer.analyze",
-            "when": "editorLangId == cpp",
-            "alt": "markdown.showPreview",
-            "group": "navigation"
+          "command": "spear-viewer.analyze",
+          "when": "editorLangId == cpp",
+          "alt": "markdown.showPreview",
+          "group": "navigation"
         }
-    ]
+      ]
     },
     "configuration": {
       "title": "SPEAR",
@@ -97,7 +97,11 @@
         "spear-viewer.analyze.strategy": {
           "type": "string",
           "default": "worst",
-          "enum": ["worst", "average", "best"],
+          "enum": [
+            "worst",
+            "average",
+            "best"
+          ],
           "description": "Defines a the analysis strategy used by spear.",
           "enumDescriptions": [
             "Conducts a worst-case analysis by always selecting the path with the highest energy contribution when multiple paths are available.",
@@ -119,9 +123,9 @@
     "views": {
       "spearviewersidebar": [
         {
-            "type": "webview",
-            "id": "spearsidebar.overview",
-            "name": "overview"
+          "type": "webview",
+          "id": "spearsidebar.overview",
+          "name": "overview"
         },
         {
           "type": "tree",
@@ -157,6 +161,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@vscode/sudo-prompt": "^9.3.1"
+    "@vscode/sudo-prompt": "^9.3.1",
+    "yaml": "^2.4.2"
   }
 }

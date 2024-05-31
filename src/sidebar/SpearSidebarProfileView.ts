@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { TMPDIR } from '../extension';
+import { PROJECTDIR } from '../extension';
 
 interface ProfileEnergyItem {
     category: string;
@@ -19,7 +19,7 @@ export class SpearSidebarProfileProvider implements vscode.TreeDataProvider<Prof
     }
 
     getChildren(element?: ProfileItem): Thenable<Array<ProfileItem>> {
-        if (!TMPDIR) {
+        if (!PROJECTDIR) {
             vscode.window.showInformationMessage('No profile');
             return Promise.resolve([]);
         }
@@ -27,7 +27,7 @@ export class SpearSidebarProfileProvider implements vscode.TreeDataProvider<Prof
         if (element) {
             return Promise.resolve([]);
         } else {
-            const profileJsonPath = path.join(TMPDIR, 'profile.json');
+            const profileJsonPath = path.join(PROJECTDIR, 'profile.json');
 
             console.log(profileJsonPath);
 

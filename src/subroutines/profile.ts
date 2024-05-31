@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { ProfileProvider, TMPDIR } from '../extension';
+import { ProfileProvider, PROJECTDIR } from '../extension';
 import util from 'util';
 import { SETTINGS } from '../helper/extensionConstants';
 
@@ -18,8 +18,8 @@ export default async function profile() {
 
 
     // Remove a previously generated profile if present
-    if(fs.existsSync(`${TMPDIR}/profile.json`)){
-        fs.rmSync(`${TMPDIR}/profile.json`);
+    if(fs.existsSync(`${PROJECTDIR}/profile.json`)){
+        fs.rmSync(`${PROJECTDIR}/profile.json`);
     }
 
     try{
@@ -38,7 +38,7 @@ export default async function profile() {
                 try{
                     // Execute spears profile routine
                     // We prepend `pkexec` here so the user gets prompted for their password so wen can execute spear with elevated rights
-                    await exec(`pkexec ${APPPATH} profile --iterations ${ITERATIONS} --model ${PROGRAMMSPATH} --savelocation ${TMPDIR}`);
+                    await exec(`pkexec ${APPPATH} profile --iterations ${ITERATIONS} --model ${PROGRAMMSPATH} --savelocation ${PROJECTDIR}`);
                 }catch(profilingError){
                     // If the command fails, or the rights elevation failed, reject the promise
                     console.error(profilingError);
