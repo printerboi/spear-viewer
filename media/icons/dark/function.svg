@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="16"
+   height="16"
+   viewBox="0 0 16 16"
+   fill="none"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <rect
+       x="1.2630463"
+       y="0.83527156"
+       width="13.472899"
+       height="14.453455"
+       id="rect1" />
+  </defs>
+  <text
+     xml:space="preserve"
+     id="text1"
+     style="font-size:10.6667px;white-space:pre;shape-inside:url(#rect1);fill:#c5c5c5;fill-opacity:1"
+     transform="matrix(1.1411272,0,0,1.1095334,0.29209658,-0.95552343)"><tspan
+       x="1.2636719"
+       y="10.541303"
+       id="tspan4"><tspan
+         style="font-size:8px"
+         id="tspan1">f(x)</tspan></tspan></text>
+</svg>

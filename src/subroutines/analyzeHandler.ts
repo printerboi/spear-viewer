@@ -1,11 +1,20 @@
 import * as vscode from "vscode";
 import * as fs from 'fs';
 import * as path from 'path';
-import { PROJECTDIR } from '../extension';
+import { OverviewProvider, PROJECTDIR } from '../extension';
 import util from 'util';
 import { SETTINGS } from "../helper/extensionConstants";
 import { ConfigParser } from "../helper/configParser";
 const exec = util.promisify(require('child_process').exec);
+
+export interface FileFunction {
+    name: string;
+    energy: number;
+}
+
+export interface FileFunctionMapping {
+    [key: string]: Array<FileFunction>;
+}
 
 async function compileToll(filepath: string){
     const extension = path.extname(filepath);
@@ -29,6 +38,77 @@ async function linkFiles(files: Array<string>){
 async function bcToll(fileName: string){
     const filePath = `${PROJECTDIR}/compiled/${fileName}.bc`;
     return await exec(`llvm-dis -f ${filePath} -o ${PROJECTDIR}/compiled/compilation_unit.ll`);
+}
+
+export function getFunctionsPerFile(): FileFunctionMapping{
+    const resultFile = path.join(PROJECTDIR, "analysis.json");
+    let files: FileFunctionMapping = {};
+
+    if(PROJECTDIR){
+        if(fs.existsSync(resultFile)){
+            try{
+                const resultFileContent = fs.readFileSync(resultFile).toString();
+                try{
+                    let analysisResult = JSON.parse(resultFileContent);
+    
+                    for(let i = 0; i < analysisResult.functions.length; i++){
+                        const functionObject = analysisResult.functions[i];
+                        if(!functionObject.external){
+                            if(files[functionObject.file] === undefined){
+                                files[functionObject.file] = [ { name: functionObject.demangled, energy: functionObject["energy"] } ];
+                            }else{
+                                files[functionObject.file].push({ name: functionObject.demangled, energy: functionObject["energy"] });
+                            }
+                        }
+                    }
+                }catch(e){
+                    console.error(e);
+                    vscode.window.showErrorMessage(`The analysis resulted in undefined output!`);
+                }
+            }catch(e){
+                vscode.window.showErrorMessage("Analysis result file could not be parsed! Please run the analysis again");
+            }
+        }else{
+            vscode.window.showErrorMessage(`No analysis result found! Did you ran the analysis previously?`);
+        }
+    }
+
+    return files;
+}
+
+export async function openAnalysisEditor(fileToOpen: string) {
+    const fileList = ConfigParser.getFiles();
+
+    console.log(fileList);
+    console.log(fileToOpen);
+
+    if(fileList.includes(fileToOpen)){
+        const resultFile = path.join(PROJECTDIR, "analysis.json");
+        if(fs.existsSync(resultFile)){
+            try{
+                const resultFileContent = fs.readFileSync(resultFile).toString();
+                try{
+                    let analysisResult = JSON.parse(resultFileContent);
+                    console.log(analysisResult);        
+        
+                    const fileDocument = fileToOpen;
+                    const uri = vscode.Uri.parse(`spearenergy://${fileDocument}?analysisresult=${encodeURIComponent(JSON.stringify(analysisResult))}`);
+                    const doc = await vscode.workspace.openTextDocument(uri); // calls back into the provider
+                    await vscode.window.showTextDocument(doc, { preview: false });
+        
+                }catch(e){
+                    console.error(e);
+                    vscode.window.showErrorMessage(`The analysis resulted in undefined output!`);
+                }
+            }catch(e){
+                vscode.window.showErrorMessage("Analysis result file could not be parsed! Please run the analysis again");
+            }
+        }else{
+            vscode.window.showErrorMessage(`No analysis result found! Did you ran the analysis previously?`);
+        }
+    }else{
+        vscode.window.showErrorMessage(`The file ${fileToOpen} was not analyzed!`);
+    }
 }
 
 
@@ -83,27 +163,15 @@ export default async function analyzeHandler() {
 
                             if(!bcError){
                                 console.log("Linking process done!");
-                                let instructionCommand = `${APPPATH} analyze --profile ${profilepath} --mode instruction --format json --strategy ${STRATEGY} --loopbound ${LOOPBOUND} --withCalls --program ${PROJECTDIR}/compiled/compilation_unit.ll`;
+                                let instructionCommand = `${APPPATH} analyze --profile ${profilepath} --mode instruction --format json --strategy ${STRATEGY} --loopbound ${LOOPBOUND} --withCalls --program ${PROJECTDIR}/compiled/compilation_unit.ll > ${PROJECTDIR}/analysis.json`;
                                 const {stdout, stderr} = await exec(instructionCommand);
 
                                 if(stderr){
                                     console.error(stderr);
-                                    vscode.window.showErrorMessage(`The graph could not be generated!`);
+                                    vscode.window.showErrorMessage(`The analysis could not be generated!`);
                                 }else{
-                                    try{
-                                        let analysisResult = JSON.parse(stdout);
-                                        console.log(analysisResult);
-        
-        
-                                        const fileDocument = activeEditor.document;
-                                        const uri = vscode.Uri.parse(`spearenergy://${fileDocument.fileName}?analysisresult=${encodeURIComponent(JSON.stringify(analysisResult))}`);
-                                        const doc = await vscode.workspace.openTextDocument(uri); // calls back into the provider
-                                        await vscode.window.showTextDocument(doc, { preview: true });
-        
-                                    }catch(e){
-                                        console.error(e);
-                                        vscode.window.showErrorMessage(`The analysis resulted in undefined output!`);
-                                    }
+                                    vscode.window.showInformationMessage(`Analaysis executed successfully!`);
+                                    vscode.commands.executeCommand("spearsidebar.analysisresult.focus");
                                 }
                             }else{
                                 vscode.window.showErrorMessage(`Converting of compilation unit to LLVM IR failed! Reason: ${linkError}`);

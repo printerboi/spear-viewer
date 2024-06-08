@@ -10,14 +10,18 @@ import profile from './subroutines/profile';
 import { triggerDecorationUpdate } from './subroutines/decorationHandler';
 import analyzeHandler from './subroutines/analyzeHandler';
 import { energyEditorProvider } from './editors/virtualEnergyEditor';
-import { SpearSidebarViewProvider } from './sidebar/SpearSidebarViewProvider';
+import { SpearSidebarAnalysisFilesViewer } from './sidebar/SpearSidebarAnalysisFilesViewer';
 import { SpearSidebarProfileProvider } from './sidebar/SpearSidebarProfileView';
+import { StatusbarRunButton } from './statusbar/StatusbarRunButton';
 
 //export let TMPDIR: string = "";
 export let PROJECTDIR: string = "";
 export let CONFIGPATH: string = "";
 export let CONFIGLOCATION: string = "";
 export const ProfileProvider = new SpearSidebarProfileProvider();
+export const OverviewProvider = new SpearSidebarAnalysisFilesViewer();
+
+
 
 
 // This method is called when your extension is activated
@@ -32,12 +36,14 @@ export function activate(context: vscode.ExtensionContext) {
 		console.log('Spear-viewer active!');
 
 		let activeEditor = vscode.window.activeTextEditor;
-		const OverviewProvider = new SpearSidebarViewProvider(context.extensionUri);
 
 		if(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0){
 			CONFIGPATH = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/spear.yml`;
 			PROJECTDIR = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.spear`;
 			CONFIGLOCATION = `${vscode.workspace.workspaceFolders[0].uri.fsPath}`;
+
+			OverviewProvider.refresh();
+
 
 			if(!fs.existsSync(CONFIGPATH)){
 				vscode.window.showInformationMessage('No spear config file was provided. Please create one first!', "Create", "Later...")
@@ -76,19 +82,27 @@ export function activate(context: vscode.ExtensionContext) {
 					analyzeHandler();
 				}),
 	
-				vscode.window.registerWebviewViewProvider(SpearSidebarViewProvider.viewType, OverviewProvider),
+				vscode.window.registerTreeDataProvider("spearsidebar.analysisresult", OverviewProvider),
 	
 				vscode.window.registerTreeDataProvider("spearsidebar.profile", ProfileProvider),
 	
 				vscode.commands.registerCommand('spear-viewer.profile.refreshEntry', () =>
 					ProfileProvider.refresh()
 				),
+
+				vscode.commands.registerCommand('spear-viewer.analysisresult.refreshEntry', () =>
+					OverviewProvider.refresh()
+				),
 	
 				/**
 				 * Opens a readonly editor and display the code with energy highlighting
 				 */
 				vscode.workspace.registerTextDocumentContentProvider("spearenergy", energyEditorProvider),
+
+				StatusbarRunButton.get()
 			);
+
+			StatusbarRunButton.update();
 		}
 
 		if (activeEditor) {
@@ -100,12 +114,16 @@ export function activate(context: vscode.ExtensionContext) {
 			if (editor) {
 				triggerDecorationUpdate(false, activeEditor, context);
 			}
+
+			StatusbarRunButton.update();
 		}, null, context.subscriptions);
 	
 		vscode.workspace.onDidChangeTextDocument(event => {
 			if (activeEditor && event.document === activeEditor.document) {
 				triggerDecorationUpdate(true, activeEditor, context);
 			}
+
+			StatusbarRunButton.update();
 		}, null, context.subscriptions);
 
 

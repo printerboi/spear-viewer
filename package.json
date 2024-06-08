@@ -42,6 +42,14 @@
           "light": "media/icons/light/reload.svg",
           "dark": "media/icons/dark/reload.svg"
         }
+      },
+      {
+        "command": "spear-viewer.analysisresult.refreshEntry",
+        "title": "Spear: Reload Analysis",
+        "icon": {
+          "light": "media/icons/light/reload.svg",
+          "dark": "media/icons/dark/reload.svg"
+        }
       }
     ],
     "menus": {
@@ -55,13 +63,17 @@
           "command": "spear-viewer.profile",
           "when": "view == spearsidebar.profile",
           "group": "navigation"
+        },
+        {
+          "command": "spear-viewer.analysisresult.refreshEntry",
+          "when": "view == spearsidebar.analysisresult",
+          "group": "navigation"
         }
       ],
-      "editor/title": [
+      "status": [
         {
           "command": "spear-viewer.analyze",
-          "when": "editorLangId == cpp",
-          "alt": "markdown.showPreview",
+          "alt": "spear-viewer.analyze",
           "group": "navigation"
         }
       ]
@@ -123,9 +135,9 @@
     "views": {
       "spearviewersidebar": [
         {
-          "type": "webview",
-          "id": "spearsidebar.overview",
-          "name": "overview"
+          "type": "tree",
+          "id": "spearsidebar.analysisresult",
+          "name": "Analyse"
         },
         {
           "type": "tree",
