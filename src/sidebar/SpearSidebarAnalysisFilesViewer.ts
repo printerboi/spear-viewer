@@ -65,18 +65,22 @@ export class SpearSidebarAnalysisFilesViewer implements vscode.TreeDataProvider<
                 return new FileItem(item.name, item.path, item.functions);
             };
 
-            const configFiles = ConfigParser.getFiles();
-
-            if(configFiles){
-                return configFiles.map((key) => {
-                    const filename = path.basename(key);
-                    const functions = mapping[key];
-                    let analysisFunctionObjects: Array<AnalysisFunctionObject> = [];
-                    if(functions){
-                        analysisFunctionObjects = functions.map((func) => {return  { name: func.name, energy: func.energy }; });
-                    }
-                    return toFileItem({ name: filename, path: key, functions: analysisFunctionObjects });
-                });
+            if(ConfigParser.validateConfig()){
+                const configFiles = ConfigParser.getFiles();
+                
+                if(configFiles){
+                    return configFiles.map((key) => {
+                        const filename = path.basename(key);
+                        const functions = mapping[key];
+                        let analysisFunctionObjects: Array<AnalysisFunctionObject> = [];
+                        if(functions){
+                            analysisFunctionObjects = functions.map((func) => {return  { name: func.name, energy: func.energy }; });
+                        }
+                        return toFileItem({ name: filename, path: key, functions: analysisFunctionObjects });
+                    });
+                }else{
+                    return [];
+                }
             }else{
                 return [];
             }

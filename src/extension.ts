@@ -13,11 +13,13 @@ import { energyEditorProvider } from './editors/virtualEnergyEditor';
 import { SpearSidebarAnalysisFilesViewer } from './sidebar/SpearSidebarAnalysisFilesViewer';
 import { SpearSidebarProfileProvider } from './sidebar/SpearSidebarProfileView';
 import { StatusbarRunButton } from './statusbar/StatusbarRunButton';
+import { ConfigParser } from './helper/configParser';
 
 //export let TMPDIR: string = "";
 export let PROJECTDIR: string = "";
 export let CONFIGPATH: string = "";
 export let CONFIGLOCATION: string = "";
+export let EXTENSIONLOCATION: string = "";
 export const ProfileProvider = new SpearSidebarProfileProvider();
 export const OverviewProvider = new SpearSidebarAnalysisFilesViewer();
 
@@ -41,24 +43,13 @@ export function activate(context: vscode.ExtensionContext) {
 			CONFIGPATH = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/spear.yml`;
 			PROJECTDIR = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.spear`;
 			CONFIGLOCATION = `${vscode.workspace.workspaceFolders[0].uri.fsPath}`;
+			EXTENSIONLOCATION = `${context.extensionPath}`;
 
 			OverviewProvider.refresh();
 
 
 			if(!fs.existsSync(CONFIGPATH)){
-				vscode.window.showInformationMessage('No spear config file was provided. Please create one first!', "Create", "Later...")
-				.then((value) => {
-					console.log(value);
-					if(value === "Create"){
-						const projectFileStream = fs.createWriteStream(CONFIGPATH);
-
-						const sampleConfig = fs.readFileSync(`${context.extensionPath}/util/sample.config.yml`);
-						projectFileStream.write(sampleConfig);
-						projectFileStream.end();
-						fs.mkdirSync(PROJECTDIR);
-						vscode.window.showInformationMessage("Spear config created!");
-					}
-				});
+				ConfigParser.presentConfigCreationDialog();
 			}
 			
 			context.subscriptions.push(

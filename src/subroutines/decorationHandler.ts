@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { graphDecorationType } from '../decorations/graphDecoration';
 import { AnalysisDecorationWrapper, AnalysisResult } from '../decorations/energyDecoration';
 import qs from 'querystring';
+import { AnalysisOptions, ConfigParser } from '../helper/configParser';
 
 export let timeout: ReturnType<typeof setTimeout> | undefined = undefined;
 
@@ -22,42 +23,48 @@ export async function updateDecorations(activeEditor: vscode.TextEditor | undefi
 
     // Check thath the currently open document uses the spearenergy uri scheme
     if(activeEditor.document.uri.scheme === "spearenergy"){
-        // Get the query of the provided uri
-        const query = activeEditor.document.uri.query;
-        // Parse the query params to get the analysisresult for the document
-        const jsUrlparams = qs.parse(query);
+        if(ConfigParser.validateConfig()){
+            const analysisOptions: AnalysisOptions | undefined = ConfigParser.getAnalysisOptions();
 
-        // Check that the query params contain an analysisresult
-        if(jsUrlparams && jsUrlparams.analysisresult){
-            const analysisResult = jsUrlparams.analysisresult as string;
-            // Parse the query string as JSON
-            try{
-                const energyJson: AnalysisResult = JSON.parse(analysisResult);
+            if(analysisOptions !== undefined){
+                // Get the query of the provided uri
+                const query = activeEditor.document.uri.query;
+                // Parse the query params to get the analysisresult for the document
+                const jsUrlparams = qs.parse(query);
 
-                // If the parsing worked
-                if(energyJson){
-                    // Construct the AnalysisDecorationWrapper with the energyjson and the path of the currently open file
-                    const decWrapper = new AnalysisDecorationWrapper(energyJson, activeEditor.document.fileName, context);
+                // Check that the query params contain an analysisresult
+                if(jsUrlparams && jsUrlparams.analysisresult){
+                    const analysisResult = jsUrlparams.analysisresult as string;
+                    // Parse the query string as JSON
+                    try{
+                        const energyJson: AnalysisResult = JSON.parse(analysisResult);
 
-                    // Iterate over the lines of the document
-                    for(let i = 0; i < activeEditor.document.lineCount; i++){
-                        // Construct a decoration for this line
-                        let hoverMessage = undefined;
-                        const energyAsString = decWrapper.getEnergyAsString(i);
-                        if(energyAsString !== ""){
-                            hoverMessage = new vscode.MarkdownString(`${decWrapper.getEnergyAsString(i)} J`);
+                        // If the parsing worked
+                        if(energyJson){
+                            // Construct the AnalysisDecorationWrapper with the energyjson and the path of the currently open file
+                            const decWrapper = new AnalysisDecorationWrapper(energyJson, activeEditor.document.fileName, context, analysisOptions.threshold);
 
-                            const decoration = { range: new vscode.Range(i, 0, i, 0), hoverMessage: hoverMessage };
+                            // Iterate over the lines of the document
+                            for(let i = 0; i < activeEditor.document.lineCount; i++){
+                                // Construct a decoration for this line
+                                let hoverMessage = undefined;
+                                const energyAsString = decWrapper.getEnergyAsString(i);
+                                if(energyAsString !== ""){
+                                    hoverMessage = new vscode.MarkdownString(`${decWrapper.getEnergyAsString(i)} J`);
 
-                            // Activate the decoration and get the RenderOptions with the wrapper
-                            activeEditor.setDecorations(vscode.window.createTextEditorDecorationType(decWrapper.getDecoration(i)), [decoration]);
+                                    const decoration = { range: new vscode.Range(i, 0, i, 0), hoverMessage: hoverMessage };
+
+                                    // Activate the decoration and get the RenderOptions with the wrapper
+                                    activeEditor.setDecorations(vscode.window.createTextEditorDecorationType(decWrapper.getDecoration(i)), [decoration]);
+                                }
+                                
+                            }
                         }
-                        
+                    }catch(e){
+                        console.error(e);
+                        console.error("Analysis could not be parsed");
                     }
                 }
-            }catch(e){
-                console.error(e);
-                console.error("Analysis could not be parsed");
             }
         }
     }

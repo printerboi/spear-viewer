@@ -93,13 +93,15 @@ export class AnalysisDecorationWrapper {
 
     context: vscode.ExtensionContext;
 
+    threshold: number;
+
 
     /**
      * 
      * @param engjsn 
      * @param relevantFile 
      */
-    constructor(engjsn: any, relevantFile: string, context: vscode.ExtensionContext){
+    constructor(engjsn: any, relevantFile: string, context: vscode.ExtensionContext, threshold: number){
         // Intialize the analysis result and the relevant file for the wrapper
         this.energyJson = engjsn;
         this.relevantFile = relevantFile;
@@ -112,9 +114,12 @@ export class AnalysisDecorationWrapper {
         // Set the maxval to 0, as we don't except negative energy values, 0 is the lowest value that can occur
         this.maxVal = 0;
 
+        this.threshold = threshold;
+
         // Parse the analysis result
         this.parse();
         console.log(this.lineEnergyMapping);
+
     }
 
     /**
@@ -236,7 +241,7 @@ export class AnalysisDecorationWrapper {
 
 
     getGutterIcon(lineNumber: number): vscode.Uri | undefined{
-        const THRESHOLD = SETTINGS.getTHRESHOLD();
+        const THRESHOLD = this.threshold;
 
         if(THRESHOLD !== undefined){
             if(this.lineEnergyMapping[lineNumber] > THRESHOLD){
