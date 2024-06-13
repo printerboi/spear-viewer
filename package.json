@@ -17,24 +17,67 @@
     "commands": [
       {
         "command": "spear-viewer.profile",
-        "title": "Profile: Profile the energy usage of the system"
+        "title": "Profile: Profile the energy usage of the system",
+        "icon": {
+          "light": "media/icons/light/play-circle.svg",
+          "dark": "media/icons/dark/play-circle.svg"
+        }
       },
       {
         "command": "spear-viewer.analyze",
-        "title": "Analyze: Analyze the energy usage of the program"
+        "title": "Analyze: Analyze the energy usage of the program",
+        "icon": {
+          "light": "media/icons/light/analyze.svg",
+          "dark": "media/icons/dark/analyze.svg"
+        }
       },
       {
         "command": "spear-viewer.graph",
         "title": "Spear: Generate the spear graph to a program"
+      },
+      {
+        "command": "spear-viewer.profile.refreshEntry",
+        "title": "Spear: Reload Profile",
+        "icon": {
+          "light": "media/icons/light/reload.svg",
+          "dark": "media/icons/dark/reload.svg"
+        }
+      },
+      {
+        "command": "spear-viewer.analysisresult.refreshEntry",
+        "title": "Spear: Reload Analysis",
+        "icon": {
+          "light": "media/icons/light/reload.svg",
+          "dark": "media/icons/dark/reload.svg"
+        }
       }
     ],
-    "languages": [{
-      "id": "cpp",
-      "extensions": [".cpp"]
-    }],
-    "hoverProviders": [{
-      "language": "cpp"
-    }],
+    "menus": {
+      "view/title": [
+        {
+          "command": "spear-viewer.profile.refreshEntry",
+          "when": "view == spearsidebar.profile",
+          "group": "navigation"
+        },
+        {
+          "command": "spear-viewer.profile",
+          "when": "view == spearsidebar.profile",
+          "group": "navigation"
+        },
+        {
+          "command": "spear-viewer.analysisresult.refreshEntry",
+          "when": "view == spearsidebar.analysisresult",
+          "group": "navigation"
+        }
+      ],
+      "status": [
+        {
+          "command": "spear-viewer.analyze",
+          "alt": "spear-viewer.analyze",
+          "group": "navigation"
+        }
+      ]
+    },
     "configuration": {
       "title": "SPEAR",
       "properties": {
@@ -52,8 +95,56 @@
           "type": "number",
           "default": 10000,
           "description": "Amount of repeated measurements during profiling. Higher values increase the accuracy of the measurement but will increase the runtime of the profiling (depending on the performance of your system)"
+        },
+        "spear-viewer.analyze.threshold": {
+          "type": "number",
+          "default": 0,
+          "description": "Defines a threshhold after which energy usage is highlighted. Any energy usage below this value will not be highlighted!"
+        },
+        "spear-viewer.analyze.loopbound": {
+          "type": "number",
+          "default": 100,
+          "description": "The value that approximates the number of loop iterations when the number of repetitions cannot be statically determined."
+        },
+        "spear-viewer.analyze.strategy": {
+          "type": "string",
+          "default": "worst",
+          "enum": [
+            "worst",
+            "average",
+            "best"
+          ],
+          "description": "Defines a the analysis strategy used by spear.",
+          "enumDescriptions": [
+            "Conducts a worst-case analysis by always selecting the path with the highest energy contribution when multiple paths are available.",
+            "Conducts an average-case analysis by balancing paths with the highest and lowest energy usage.",
+            "Conducts a best-case analysis by always selecting the path with the smallest energy contribution when multiple paths are available."
+          ]
         }
       }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "spearviewersidebar",
+          "title": "SPEAR",
+          "icon": "media/lightning.svg"
+        }
+      ]
+    },
+    "views": {
+      "spearviewersidebar": [
+        {
+          "type": "tree",
+          "id": "spearsidebar.analysisresult",
+          "name": "Analyse"
+        },
+        {
+          "type": "tree",
+          "id": "spearsidebar.profile",
+          "name": "Profile"
+        }
+      ]
     }
   },
   "scripts": {
@@ -82,6 +173,8 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@vscode/sudo-prompt": "^9.3.1"
+    "@vscode/sudo-prompt": "^9.3.1",
+    "moment": "^2.30.1",
+    "yaml": "^2.4.2"
   }
 }

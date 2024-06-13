@@ -1,0 +1,14 @@
+.settingscontainer{
+    display: flex;
+    flex-direction: column;
+}
+
+.settingrow{
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+}
+
+.settingname{
+    font-weight: bold;
+}

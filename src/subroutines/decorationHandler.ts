@@ -1,23 +1,73 @@
 import * as vscode from 'vscode';
 import { graphDecorationType } from '../decorations/graphDecoration';
+import { AnalysisDecorationWrapper, AnalysisResult } from '../decorations/energyDecoration';
+import qs from 'querystring';
+import { AnalysisOptions, ConfigParser } from '../helper/configParser';
 
 export let timeout: ReturnType<typeof setTimeout> | undefined = undefined;
 
 
-export async function updateDecorations(activeEditor: vscode.TextEditor | undefined) {
+/**
+ * Updates the decorations for the given vscode TextEditor
+ * @param activeEditor TextEditor the decorations should be updated for
+ */
+export async function updateDecorations(activeEditor: vscode.TextEditor | undefined, context: vscode.ExtensionContext) {
+    // Check if the given editor is valid, return otherwise
     if(!activeEditor){
         return;
     }
 
-    /* // RegEx to detect C/C++ function definitions
-    // See https://www.researchgate.net/figure/Regular-expression-to-identify-C-C-function-declarations_fig7_368244118
-    const parseRegEx = /(static|bool|char|int|float|double|void|struct).*\(.*\)*.*\{/gm;
-    const code = activeEditor.document.getText(); */
-
-    console.log(activeEditor.document.uri);
-
-
+    // Calculate the symbols of the open document
+    // This yields the function definitions in the current file
     const symbols = await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider', activeEditor.document.uri);
+
+    // Check thath the currently open document uses the spearenergy uri scheme
+    if(activeEditor.document.uri.scheme === "spearenergy"){
+        if(ConfigParser.validateConfig()){
+            const analysisOptions: AnalysisOptions | undefined = ConfigParser.getAnalysisOptions();
+
+            if(analysisOptions !== undefined){
+                // Get the query of the provided uri
+                const query = activeEditor.document.uri.query;
+                // Parse the query params to get the analysisresult for the document
+                const jsUrlparams = qs.parse(query);
+
+                // Check that the query params contain an analysisresult
+                if(jsUrlparams && jsUrlparams.analysisresult){
+                    const analysisResult = jsUrlparams.analysisresult as string;
+                    // Parse the query string as JSON
+                    try{
+                        const energyJson: AnalysisResult = JSON.parse(analysisResult);
+
+                        // If the parsing worked
+                        if(energyJson){
+                            // Construct the AnalysisDecorationWrapper with the energyjson and the path of the currently open file
+                            const decWrapper = new AnalysisDecorationWrapper(energyJson, activeEditor.document.fileName, context, analysisOptions.threshold);
+
+                            // Iterate over the lines of the document
+                            for(let i = 0; i < activeEditor.document.lineCount; i++){
+                                // Construct a decoration for this line
+                                let hoverMessage = undefined;
+                                const energyAsString = decWrapper.getEnergyAsString(i);
+                                if(energyAsString !== ""){
+                                    hoverMessage = new vscode.MarkdownString(`${decWrapper.getEnergyAsString(i)} J`);
+
+                                    const decoration = { range: new vscode.Range(i, 0, i, 0), hoverMessage: hoverMessage };
+
+                                    // Activate the decoration and get the RenderOptions with the wrapper
+                                    activeEditor.setDecorations(vscode.window.createTextEditorDecorationType(decWrapper.getDecoration(i)), [decoration]);
+                                }
+                                
+                            }
+                        }
+                    }catch(e){
+                        console.error(e);
+                        console.error("Analysis could not be parsed");
+                    }
+                }
+            }
+        }
+    }
 
     if(symbols){
         const information = symbols as vscode.SymbolInformation[];
@@ -35,7 +85,7 @@ export async function updateDecorations(activeEditor: vscode.TextEditor | undefi
             if(parsedName){
                 const graphCommandUri = vscode.Uri.parse(`command:spear-viewer.graph?${encodeURIComponent(JSON.stringify({ functionname: parsedName }))}`);
 
-                const hoverMessage = new vscode.MarkdownString(`[📈 Show energy graph](${graphCommandUri}) **|** [⚡ Calculate energy usage](#)`);
+                const hoverMessage = new vscode.MarkdownString(`[📈 Show energy graph](${graphCommandUri})`);
                 hoverMessage.isTrusted = true;
 
                 const decoration = { range: new vscode.Range(symbol.location.range.start, new vscode.Position(symbol.location.range.start.line, 10)), hoverMessage: hoverMessage };
@@ -45,35 +95,17 @@ export async function updateDecorations(activeEditor: vscode.TextEditor | undefi
 
         activeEditor.setDecorations(graphDecorationType, functionDefinitions);
     }
-
-
-    /* const functionDefinitions: vscode.DecorationOptions[] = [];
-    
-    let match;
-    while ((match = parseRegEx.exec(code))) {
-        const startPos = activeEditor.document.positionAt(match.index);
-        const endPos = activeEditor.document.positionAt(match.index + match[0].length);
-
-        const hoverMessage = new vscode.MarkdownString(`The energy for ${match[0]} can be calculated!<br>[📈 Show energy graph](#) **|** [⚡ Calculate energy usage](#)`);
-        hoverMessage.isTrusted = true;
-
-        const decoration = { range: new vscode.Range(startPos, endPos), hoverMessage: hoverMessage };
-        
-        functionDefinitions.push(decoration);
-    }
-
-    activeEditor.setDecorations(graphDecorationType, functionDefinitions); */
 }
 
-export function triggerDecorationUpdate(throttle = false, activeEditor: vscode.TextEditor | undefined) {
+export function triggerDecorationUpdate(throttle = false, activeEditor: vscode.TextEditor | undefined, context: vscode.ExtensionContext) {
     if(timeout){
         clearTimeout(timeout);
         timeout = undefined;
     }
 
     if(throttle){
-        timeout = setTimeout(() => { updateDecorations(activeEditor); }, 1000);
+        timeout = setTimeout(() => { updateDecorations(activeEditor, context); }, 1000);
     }else{
-        updateDecorations(activeEditor);
+        updateDecorations(activeEditor, context);
     }
 }
