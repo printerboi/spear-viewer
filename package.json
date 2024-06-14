@@ -50,6 +50,14 @@
           "light": "media/icons/light/reload.svg",
           "dark": "media/icons/dark/reload.svg"
         }
+      },
+      {
+        "command": "spear-viewer.callgraph.refreshEntry",
+        "title": "Spear: Reload Callgraph",
+        "icon": {
+          "light": "media/icons/light/reload.svg",
+          "dark": "media/icons/dark/reload.svg"
+        }
       }
     ],
     "menus": {
@@ -67,6 +75,11 @@
         {
           "command": "spear-viewer.analysisresult.refreshEntry",
           "when": "view == spearsidebar.analysisresult",
+          "group": "navigation"
+        },
+        {
+          "command": "spear-viewer.callgraph.refreshEntry",
+          "when": "view == spearsidebar.callgraph",
           "group": "navigation"
         }
       ],
@@ -138,6 +151,11 @@
           "type": "tree",
           "id": "spearsidebar.analysisresult",
           "name": "Analyse"
+        },
+        {
+          "type": "tree",
+          "id": "spearsidebar.callgraph",
+          "name": "Callgraph"
         },
         {
           "type": "tree",

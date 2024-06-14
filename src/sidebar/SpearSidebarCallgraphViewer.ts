@@ -3,8 +3,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { CONFIGPATH, PROJECTDIR } from '../extension';
 import { ConfigParser } from '../helper/configParser';
-import { getFunctionsPerFile, openAnalysisEditor } from '../subroutines/analyzeHandler';
-import { FileFunctionMapping } from '../types/AnalysisTypes';
+import { getCallGraph, openAnalysisEditor } from '../subroutines/analyzeHandler';
+import { CallGraphNode, Callgraph, FileFunctionMapping } from '../types/AnalysisTypes';
 
 interface AnalysisConfigFileItem {
     name: string;
@@ -17,12 +17,12 @@ interface AnalysisFunctionObject {
     energy: number;
 }
 
-export class SpearSidebarAnalysisFilesViewer implements vscode.TreeDataProvider<GeneralItem> {  
-    fileFunctionMapping: FileFunctionMapping;
+export class SpearSidebarCallgraphViewer implements vscode.TreeDataProvider<GeneralItem> {  
+    callgraph: Callgraph;
 
     constructor(){
-        vscode.commands.registerCommand('spearsidebar.anaylsis.onItemClicked', item => this.onItemClick(item));
-        this.fileFunctionMapping = getFunctionsPerFile();
+        vscode.commands.registerCommand('spearsidebar.callgraph.onItemClicked', item => this.onItemClick(item));
+        this.callgraph = getCallGraph();
     }
 
     private _onDidChangeTreeData: vscode.EventEmitter<GeneralItem | undefined | null | void> = new vscode.EventEmitter<GeneralItem | undefined | null | void>();
@@ -32,7 +32,7 @@ export class SpearSidebarAnalysisFilesViewer implements vscode.TreeDataProvider<
 
     getTreeItem(element: GeneralItem): vscode.TreeItem {
         const newElement = element;
-        newElement.command = { command: 'spearsidebar.anaylsis.onItemClicked', title : element.label, arguments: [element] };;
+        //newElement.command = { command: 'spearsidebar.callgraph.onItemClicked', title : element.label, arguments: [element] };;
         return newElement;
     }
 
@@ -58,30 +58,30 @@ export class SpearSidebarAnalysisFilesViewer implements vscode.TreeDataProvider<
         }
     }
 
-    private getAnalysisInformation(analysisConfigPath: string): Array<FileItem>{
+    private getAnalysisInformation(analysisConfigPath: string): Array<FunctionItem>{
         if(this.fileExists(analysisConfigPath)) {
-            const mapping = getFunctionsPerFile();
+            const mapping = getCallGraph();
 
-            const toFileItem = (item: AnalysisConfigFileItem): FileItem => {
+/*             const toFileItem = (item: AnalysisConfigFileItem): FileItem => {
                 return new FileItem(item.name, item.path, item.functions);
-            };
+            }; */
 
-            if(ConfigParser.validateConfig()){
-                const configFiles = ConfigParser.getFiles();
-                
-                if(configFiles){
-                    return configFiles.map((key) => {
-                        const filename = path.basename(key);
-                        const functions = mapping[key];
-                        let analysisFunctionObjects: Array<AnalysisFunctionObject> = [];
-                        if(functions){
-                            analysisFunctionObjects = functions.map((func) => {return  { name: func.name, energy: func.energy }; });
-                        }
-                        return toFileItem({ name: filename, path: key, functions: analysisFunctionObjects });
-                    });
-                }else{
-                    return [];
-                }
+            if(mapping !== undefined){
+                /* return configFiles.map((key) => {
+                    const filename = path.basename(key);
+                    const functions = mapping[key];
+                    let analysisFunctionObjects: Array<AnalysisFunctionObject> = [];
+                    if(functions){
+                        analysisFunctionObjects = functions.map((func) => {return  { name: func.name, energy: func.energy }; });
+                    }
+                    return toFileItem({ name: filename, path: key, functions: analysisFunctionObjects });
+                }); */
+
+                const mainNode: CallGraphNode = mapping["main"];
+
+                return [
+                    new FunctionItem(mainNode, mainNode.energy, mapping, mainNode.calledFunctions, undefined, undefined)
+                ];
             }else{
                 return [];
             }
@@ -92,7 +92,7 @@ export class SpearSidebarAnalysisFilesViewer implements vscode.TreeDataProvider<
 
     refresh(): void {
         console.log("refreshing...");
-        this.fileFunctionMapping = getFunctionsPerFile();
+        this.callgraph = getCallGraph();
         this._onDidChangeTreeData.fire();
     }
 
@@ -130,32 +130,34 @@ class GeneralItem extends vscode.TreeItem {
     }
 
     this.iconPath = {
-        light: path.join(__filename, '..', '..', 'media', 'icons', 'light', 'file-code.svg'),
-        dark: path.join(__filename, '..', '..', 'media', 'icons', 'dark', 'file-code.svg')
+        light: path.join(__filename, '..', '..', 'media', 'icons', 'light', 'function.svg'),
+        dark: path.join(__filename, '..', '..', 'media', 'icons', 'dark', 'function.svg')
     };
   }
 }
 
 class FunctionItem extends GeneralItem {
-    constructor(public readonly label: string, private energy: string) {
-        super(label, energy, vscode.TreeItemCollapsibleState.None, false, false);
+  constructor(public readonly node: CallGraphNode, energy: number, callGraph: Callgraph, functions: Array<string>, parent?: string, grandParent?: string) {
+    const energyString = `${energy.toFixed(3)} J`;
+    const isRecursion = (node.name === parent && node.name === grandParent);
+    const hasChildren = !isRecursion && (functions.length > 0);
 
-        this.iconPath = {
-            light: path.join(__filename, '..', '..', 'media', 'icons', 'light', 'function.svg'),
-            dark: path.join(__filename, '..', '..', 'media', 'icons', 'dark', 'function.svg')
-        };
+    let name = `${node.demangled}`;
+    if(isRecursion){
+        name += "(rec)";
     }
-}
 
-class FileItem extends GeneralItem {
-  constructor(public readonly label: string, private path: string, functions: Array<AnalysisFunctionObject>) {
-    super(label, path, vscode.TreeItemCollapsibleState.Expanded, false, true);
+    super(name, energyString, hasChildren? vscode.TreeItemCollapsibleState.Expanded: vscode.TreeItemCollapsibleState.None, false, true);
 
     const objs: Array<GeneralItem> = [];
-    functions.forEach((func) => {
-        const energy = `${func.energy.toFixed(3)} J`;
-        objs.push(new FunctionItem(func.name, energy));
-    });
+    if(!isRecursion || parent === undefined){
+        functions.forEach((func: string) => {
+            const callGraphNode: CallGraphNode = callGraph[func];
+            if(callGraphNode !== undefined){
+                objs.push(new FunctionItem(callGraphNode, callGraphNode.energy, callGraph, callGraphNode.calledFunctions, node.name, parent));
+            }
+        });
+    }
     this.children = objs;
   }
 }
