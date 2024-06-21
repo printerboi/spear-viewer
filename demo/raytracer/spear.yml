@@ -1,0 +1,17 @@
+version: "1.0"
+name: Raytracer
+analysis:
+  loopbound: 100
+  strategy: 'worst'
+  threshold: 0
+profiling:
+  iterations: 100
+files:
+  - main.cpp
+  - include/Camera.cpp
+  - include/color.cpp
+  - include/hitable_list.cpp
+  - include/interval.cpp
+  - include/Ray.cpp
+  - include/Sphere.cpp
+  - include/vec3.cpp
