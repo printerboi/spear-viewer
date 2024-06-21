@@ -16,4 +16,4 @@ void establishConnection(std::string url);
 
 void connect(SSL_CTX* ctx, BIO* bio);
 
-void fetchData(BIO* bio);
+void fetchData(BIO* bio, std::string url);

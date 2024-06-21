@@ -8,3 +8,4 @@ build/
 .idea/
 .spear/
 .vcode/
+cmake-build-debug

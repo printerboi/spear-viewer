@@ -4,9 +4,11 @@
 
 int main(){
     init();
-    std::cout << "Starting..." << std::endl;
+    std::string url;
+    std::cout << "Enter a hostname: ";
 
-    const std::string url = "www.wikipedia.org";
+    std::cin >> url;
+    std::cout << "\tStarting..." << std::endl;
     std::cout << "\tAttempting to connect to " << url << std::endl;
 
     establishConnection(url);

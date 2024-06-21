@@ -78,7 +78,7 @@ void establishConnection(std::string url){
 
     std::cout << "\tStarting data fetching..." << std::endl;
 
-    fetchData(bio);
+    fetchData(bio, url);
     cleanUpSSLArtifacts(context, bio);
     std::cout << "\tCleanup finished!" << std::endl;
 
@@ -94,8 +94,11 @@ void connect(SSL_CTX* ctx, BIO* bio){
 
 }
 
-void fetchData(BIO* bio){
-    const char *request = "GET / HTTP/1.1\r\nHost: www.wikipedia.org\r\nConnection: close\r\n\r\n";
+void fetchData(BIO* bio, std::string url){
+    std::ostringstream requestStream;
+    requestStream << "GET / HTTP/1.1\r\nHost: " << url << "\r\nConnection: close\r\n\r\n";
+    std::string requestString = requestStream.str();
+    const char *request = requestString.c_str();
     if (BIO_write(bio, request, strlen(request)) <= 0){
         if (!BIO_should_retry(bio)){
             abortConnection("Fetching failed");
