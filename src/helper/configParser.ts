@@ -138,7 +138,7 @@ export class ConfigParser{
                             const allFilesCpp = config.files.items.every((fileName: string) => {
                                 const filePath = `${CONFIGLOCATION}/${fileName}`;
                                 const extension = path.extname(filePath);
-                                return extension === ".cpp" || true;
+                                return extension === ".cpp";
                             });
 
                             if(allFilesCpp){
@@ -213,5 +213,9 @@ export class ConfigParser{
 
     static configExists(): boolean{
         return fs.existsSync(CONFIGPATH);
+    }
+
+    static profileExists(): boolean{
+        return fs.existsSync(`${PROJECTDIR}/profile.json`);
     }
 }

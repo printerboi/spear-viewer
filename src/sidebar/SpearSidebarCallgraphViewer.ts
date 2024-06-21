@@ -79,9 +79,13 @@ export class SpearSidebarCallgraphViewer implements vscode.TreeDataProvider<Gene
 
                 const mainNode: CallGraphNode = mapping["main"];
 
-                return [
-                    new FunctionItem(mainNode, mainNode.energy, mapping, mainNode.calledFunctions, undefined, undefined)
-                ];
+                if(mainNode !== undefined){
+                    return [
+                        new FunctionItem(mainNode, mainNode.energy, mapping, mainNode.calledFunctions, undefined, undefined)
+                    ];
+                }else{
+                    return [];
+                }
             }else{
                 return [];
             }

@@ -78,7 +78,11 @@ export function getFunctionsPerFile(): FileFunctionMapping{
                 vscode.window.showErrorMessage("Analysis result file could not be parsed! Please run the analysis again");
             }
         }else{
-            vscode.window.showErrorMessage(`No analysis result found! Did you ran the analysis previously?`);
+            if(ConfigParser.profileExists()){
+                vscode.window.showInformationMessage(`No analysis result found! Did you ran the analysis previously?`);
+            }else{
+                vscode.window.showInformationMessage(`Please generate a profile!`);
+            }
         }
     }else{
         ConfigParser.presentConfigCreationDialog();
@@ -118,7 +122,11 @@ export function getCallGraph(): Callgraph{
                 vscode.window.showErrorMessage("Analysis result file could not be parsed! Please run the analysis again");
             }
         }else{
-            vscode.window.showErrorMessage(`No analysis result found! Did you ran the analysis previously?`);
+            if(ConfigParser.profileExists()){
+                vscode.window.showInformationMessage(`No analysis result found! Did you ran the analysis previously?`);
+            }else{
+                vscode.window.showInformationMessage(`Please generate a profile!`);
+            }
         }
     }else{
         ConfigParser.presentConfigCreationDialog();
@@ -178,10 +186,14 @@ export async function openAnalysisEditor(fileToOpen: string) {
                     vscode.window.showErrorMessage("Analysis result file could not be parsed! Please run the analysis again");
                 }
             }else{
-                vscode.window.showErrorMessage(`No analysis result found! Did you ran the analysis previously?`);
+                vscode.window.showInformationMessage(`No analysis result found! Did you ran the analysis previously?`);
             }
         }else{
             vscode.window.showErrorMessage(`The file ${fileToOpen} was not analyzed!`);
+        }
+    }else{
+        if(!ConfigParser.profileExists()){
+            vscode.window.showInformationMessage(`Please generate a profile!`);
         }
     }
 }
@@ -240,17 +252,18 @@ export default async function analyzeHandler() {
                                 vscode.window.showInformationMessage(`Analysis executed successfully!`);
                                 vscode.commands.executeCommand("spear-viewer.analysisresult.refreshEntry");
                                 vscode.commands.executeCommand("spearsidebar.analysisresult.focus");
+                                vscode.commands.executeCommand("spear-viewer.callgraph.refreshEntry");
                             }catch(e){
                                 console.error(e);
                                 Logger.log(LogType.ERROR, `Analysis error: ${e}`);
-                                vscode.window.showErrorMessage(`The analysis could not be generated!`);
+                                vscode.window.showErrorMessage(`The analysis could not be generated! See the Error-Log for further information`);
                             }
     
                         }else{
                             vscode.window.showErrorMessage(`Converting of compilation unit to LLVM IR failed! Reason: ${bcError}`);
                         }
                     }else{
-                        vscode.window.showErrorMessage(`Linking of configured files failed!`);
+                        vscode.window.showErrorMessage(`Linking of configured files failed! See the Error-Log for further information`);
                     }
                 }
             }else{
