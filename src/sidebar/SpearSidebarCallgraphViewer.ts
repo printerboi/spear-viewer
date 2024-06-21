@@ -138,7 +138,7 @@ class GeneralItem extends vscode.TreeItem {
 
 class FunctionItem extends GeneralItem {
   constructor(public readonly node: CallGraphNode, energy: number, callGraph: Callgraph, functions: Array<string>, parent?: string, grandParent?: string) {
-    const energyString = `${energy.toFixed(3)} J`;
+    const energyString = `${energy.toFixed(3)} J in`;
     const isRecursion = (node.name === parent && node.name === grandParent);
     const hasChildren = !isRecursion && (functions.length > 0);
 
@@ -148,6 +148,8 @@ class FunctionItem extends GeneralItem {
     }
 
     super(name, energyString, hasChildren? vscode.TreeItemCollapsibleState.Expanded: vscode.TreeItemCollapsibleState.None, false, true);
+
+    this.tooltip = `${node.path}`;
 
     const objs: Array<GeneralItem> = [];
     if(!isRecursion || parent === undefined){

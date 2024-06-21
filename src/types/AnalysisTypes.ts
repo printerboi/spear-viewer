@@ -24,7 +24,7 @@ export interface SpearFunction {
     external: boolean;
     file: string;
     name: string;
-    nodes: Array<SpearNode>
+    nodes: Array<SpearNode>,
 }
 
 export interface FileFunction {
@@ -41,7 +41,8 @@ export interface CallGraphNode {
     name: string;
     demangled: string;
     energy: number;
-    calledFunctions: Array<string>
+    calledFunctions: Array<string>,
+    path: string;
 }
 
 export interface Callgraph {

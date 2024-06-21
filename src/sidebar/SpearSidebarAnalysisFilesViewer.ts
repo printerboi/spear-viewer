@@ -47,7 +47,7 @@ export class SpearSidebarAnalysisFilesViewer implements vscode.TreeDataProvider<
         }
 
         if (element) {
-            return Promise.resolve(element.children);
+            //return Promise.resolve(element.children);
         } else {
             if (this.fileExists(analysisconfig)) {
                 return Promise.resolve(this.getAnalysisInformation(analysisconfig));
@@ -119,7 +119,7 @@ class GeneralItem extends vscode.TreeItem {
   canBeAnalyzed: boolean;
 
   constructor(public readonly label: string, description: string,  public readonly collapsibleState: vscode.TreeItemCollapsibleState, isErrorMsg: boolean, canBeAnalyzed: boolean) {
-    super(label, vscode.TreeItemCollapsibleState.Expanded);
+    super(label, vscode.TreeItemCollapsibleState.None);
 
     this.canBeAnalyzed = canBeAnalyzed;
 
@@ -149,7 +149,7 @@ class FunctionItem extends GeneralItem {
 
 class FileItem extends GeneralItem {
   constructor(public readonly label: string, private path: string, functions: Array<AnalysisFunctionObject>) {
-    super(label, path, vscode.TreeItemCollapsibleState.Expanded, false, true);
+    super(label, path, vscode.TreeItemCollapsibleState.None, false, true);
 
     const objs: Array<GeneralItem> = [];
     functions.forEach((func) => {

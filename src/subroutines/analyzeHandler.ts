@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as fs from 'fs';
 import * as path from 'path';
-import { PROJECTDIR } from '../extension';
+import { PROJECTDIR, initialized } from '../extension';
 import util from 'util';
 import { SETTINGS } from "../helper/extensionConstants";
 import { AnalysisOptions, ConfigParser, strategyToString } from "../helper/configParser";
@@ -97,12 +97,16 @@ export function getCallGraph(): Callgraph{
                 const resultFileContent = fs.readFileSync(resultFile).toString();
                 try{
                     let analysisResult = JSON.parse(resultFileContent);
+                    let test = "";
     
                     for(let i = 0; i < analysisResult.functions.length; i++){
                         const functionObject: SpearFunction = analysisResult.functions[i];
+
+                        console.log(functionObject.demangled);
+
                         if(!functionObject.external){
-                            if(functions[functionObject.file] === undefined){
-                                functions[functionObject.name] = { name: functionObject.name, demangled: functionObject.demangled, energy: functionObject["energy"], calledFunctions: getCalledFunctions(functionObject) };
+                            if(functions[functionObject.name] === undefined){
+                                functions[functionObject.name] = { name: functionObject.name, demangled: functionObject.demangled, energy: functionObject["energy"], calledFunctions: getCalledFunctions(functionObject), path: functionObject.file };
                             }
                         }
                     }
@@ -127,12 +131,16 @@ export function getCallGraph(): Callgraph{
 function getCalledFunctions(functionObject: SpearFunction): Array<string>{
     const foundFunctionNames: Array<string> = [];
     
-    for(let i = 0; i < functionObject.nodes.length; i++){
-        const node: SpearNode = functionObject.nodes[i];
-        for(let j = 0; j < node.instructions.length; j++){
-            let instruction: SpearInstruction = node.instructions[j];
-            if(instruction.calledFunction !== undefined && !foundFunctionNames.includes(instruction.calledFunction)){
-                foundFunctionNames.push(instruction.calledFunction);
+    if(functionObject.nodes !== undefined){
+        for(let i = 0; i < functionObject.nodes.length; i++){
+            const node: SpearNode = functionObject.nodes[i];
+            if(node.instructions !== undefined){
+                for(let j = 0; j < node.instructions.length; j++){
+                    let instruction: SpearInstruction = node.instructions[j];
+                    if(instruction.calledFunction !== undefined && !foundFunctionNames.includes(instruction.calledFunction)){
+                        foundFunctionNames.push(instruction.calledFunction);
+                    }
+                }
             }
         }
     }
