@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.28)
-project(energy_optimized_raytracer)
+project(raytracer)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(energy_optimized_raytracer main.cpp
+add_executable(raytracer main.cpp
         include/vec3.cpp
         include/vec3.h
         include/color.h
