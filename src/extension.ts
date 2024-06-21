@@ -2,9 +2,6 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import * as path from 'path';
-import * as os from "os";
-import { APPPREFIX } from './helper/extensionConstants';
 import generateGraph, { GenerateGraphParameters } from './subroutines/generateGraph';
 import profile from './subroutines/profile';
 import { triggerDecorationUpdate } from './subroutines/decorationHandler';
@@ -14,14 +11,18 @@ import { SpearSidebarAnalysisFilesViewer } from './sidebar/SpearSidebarAnalysisF
 import { SpearSidebarProfileProvider } from './sidebar/SpearSidebarProfileView';
 import { StatusbarRunButton } from './statusbar/StatusbarRunButton';
 import { ConfigParser } from './helper/configParser';
+import { SpearSidebarCallgraphViewer } from './sidebar/SpearSidebarCallgraphViewer';
 
 //export let TMPDIR: string = "";
 export let PROJECTDIR: string = "";
 export let CONFIGPATH: string = "";
 export let CONFIGLOCATION: string = "";
 export let EXTENSIONLOCATION: string = "";
+export let initialized: boolean = false;
+
 export const ProfileProvider = new SpearSidebarProfileProvider();
 export const OverviewProvider = new SpearSidebarAnalysisFilesViewer();
+export const CallgraphProvider = new SpearSidebarCallgraphViewer();
 
 
 
@@ -45,6 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
 			CONFIGLOCATION = `${vscode.workspace.workspaceFolders[0].uri.fsPath}`;
 			EXTENSIONLOCATION = `${context.extensionPath}`;
 
+			initialized = true;
 			OverviewProvider.refresh();
 
 
@@ -74,6 +76,8 @@ export function activate(context: vscode.ExtensionContext) {
 				}),
 	
 				vscode.window.registerTreeDataProvider("spearsidebar.analysisresult", OverviewProvider),
+
+				vscode.window.registerTreeDataProvider("spearsidebar.callgraph", CallgraphProvider),
 	
 				vscode.window.registerTreeDataProvider("spearsidebar.profile", ProfileProvider),
 	
@@ -83,6 +87,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 				vscode.commands.registerCommand('spear-viewer.analysisresult.refreshEntry', () =>
 					OverviewProvider.refresh()
+				),
+
+				vscode.commands.registerCommand('spear-viewer.callgraph.refreshEntry', () =>
+					CallgraphProvider.refresh()
 				),
 	
 				/**

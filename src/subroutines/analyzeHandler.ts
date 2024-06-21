@@ -1,21 +1,14 @@
 import * as vscode from "vscode";
 import * as fs from 'fs';
 import * as path from 'path';
-import { PROJECTDIR } from '../extension';
+import { PROJECTDIR, initialized } from '../extension';
 import util from 'util';
 import { SETTINGS } from "../helper/extensionConstants";
 import { AnalysisOptions, ConfigParser, strategyToString } from "../helper/configParser";
 import { LogType, Logger } from "../helper/logger";
+import { Callgraph, FileFunction, FileFunctionMapping, SpearFunction, SpearInstruction, SpearNode } from "../types/AnalysisTypes";
 const exec = util.promisify(require('child_process').exec);
 
-export interface FileFunction {
-    name: string;
-    energy: number;
-}
-
-export interface FileFunctionMapping {
-    [key: string]: Array<FileFunction>;
-}
 
 async function compileToll(filepath: string){
     const extension = path.extname(filepath);
@@ -68,12 +61,12 @@ export function getFunctionsPerFile(): FileFunctionMapping{
                     let analysisResult = JSON.parse(resultFileContent);
     
                     for(let i = 0; i < analysisResult.functions.length; i++){
-                        const functionObject = analysisResult.functions[i];
+                        const functionObject: SpearFunction = analysisResult.functions[i];
                         if(!functionObject.external){
                             if(files[functionObject.file] === undefined){
-                                files[functionObject.file] = [ { name: functionObject.demangled, energy: functionObject["energy"] } ];
+                                files[functionObject.file] = [ { name: functionObject.demangled, energy: functionObject["energy"], calledFunctions: getCalledFunctions(functionObject) } ];
                             }else{
-                                files[functionObject.file].push({ name: functionObject.demangled, energy: functionObject["energy"] });
+                                files[functionObject.file].push({ name: functionObject.demangled, energy: functionObject["energy"], calledFunctions: getCalledFunctions(functionObject) });
                             }
                         }
                     }
@@ -85,13 +78,83 @@ export function getFunctionsPerFile(): FileFunctionMapping{
                 vscode.window.showErrorMessage("Analysis result file could not be parsed! Please run the analysis again");
             }
         }else{
-            vscode.window.showErrorMessage(`No analysis result found! Did you ran the analysis previously?`);
+            if(ConfigParser.profileExists()){
+                vscode.window.showInformationMessage(`No analysis result found! Did you ran the analysis previously?`);
+            }else{
+                vscode.window.showInformationMessage(`Please generate a profile!`);
+            }
         }
     }else{
         ConfigParser.presentConfigCreationDialog();
     }
 
     return files;
+}
+
+export function getCallGraph(): Callgraph{
+    const resultFile = path.join(PROJECTDIR, "analysis.json");
+    const functions: Callgraph = {};
+
+    if(PROJECTDIR && ConfigParser.configExists()){
+        if(fs.existsSync(resultFile)){
+            try{
+                const resultFileContent = fs.readFileSync(resultFile).toString();
+                try{
+                    let analysisResult = JSON.parse(resultFileContent);
+                    let test = "";
+    
+                    for(let i = 0; i < analysisResult.functions.length; i++){
+                        const functionObject: SpearFunction = analysisResult.functions[i];
+
+                        console.log(functionObject.demangled);
+
+                        if(!functionObject.external){
+                            if(functions[functionObject.name] === undefined){
+                                functions[functionObject.name] = { name: functionObject.name, demangled: functionObject.demangled, energy: functionObject["energy"], calledFunctions: getCalledFunctions(functionObject), path: functionObject.file };
+                            }
+                        }
+                    }
+                }catch(e){
+                    console.error(e);
+                    vscode.window.showErrorMessage(`The analysis resulted in undefined output!`);
+                }
+            }catch(e){
+                vscode.window.showErrorMessage("Analysis result file could not be parsed! Please run the analysis again");
+            }
+        }else{
+            if(ConfigParser.profileExists()){
+                vscode.window.showInformationMessage(`No analysis result found! Did you ran the analysis previously?`);
+            }else{
+                vscode.window.showInformationMessage(`Please generate a profile!`);
+            }
+        }
+    }else{
+        ConfigParser.presentConfigCreationDialog();
+    }
+
+    return functions;
+}
+
+
+function getCalledFunctions(functionObject: SpearFunction): Array<string>{
+    const foundFunctionNames: Array<string> = [];
+    
+    if(functionObject.nodes !== undefined){
+        for(let i = 0; i < functionObject.nodes.length; i++){
+            const node: SpearNode = functionObject.nodes[i];
+            if(node.instructions !== undefined){
+                for(let j = 0; j < node.instructions.length; j++){
+                    let instruction: SpearInstruction = node.instructions[j];
+                    if(instruction.calledFunction !== undefined && !foundFunctionNames.includes(instruction.calledFunction)){
+                        foundFunctionNames.push(instruction.calledFunction);
+                    }
+                }
+            }
+        }
+    }
+
+
+    return foundFunctionNames;
 }
 
 export async function openAnalysisEditor(fileToOpen: string) {
@@ -123,10 +186,14 @@ export async function openAnalysisEditor(fileToOpen: string) {
                     vscode.window.showErrorMessage("Analysis result file could not be parsed! Please run the analysis again");
                 }
             }else{
-                vscode.window.showErrorMessage(`No analysis result found! Did you ran the analysis previously?`);
+                vscode.window.showInformationMessage(`No analysis result found! Did you ran the analysis previously?`);
             }
         }else{
             vscode.window.showErrorMessage(`The file ${fileToOpen} was not analyzed!`);
+        }
+    }else{
+        if(!ConfigParser.profileExists()){
+            vscode.window.showInformationMessage(`Please generate a profile!`);
         }
     }
 }
@@ -185,17 +252,18 @@ export default async function analyzeHandler() {
                                 vscode.window.showInformationMessage(`Analysis executed successfully!`);
                                 vscode.commands.executeCommand("spear-viewer.analysisresult.refreshEntry");
                                 vscode.commands.executeCommand("spearsidebar.analysisresult.focus");
+                                vscode.commands.executeCommand("spear-viewer.callgraph.refreshEntry");
                             }catch(e){
                                 console.error(e);
                                 Logger.log(LogType.ERROR, `Analysis error: ${e}`);
-                                vscode.window.showErrorMessage(`The analysis could not be generated!`);
+                                vscode.window.showErrorMessage(`The analysis could not be generated! See the Error-Log for further information`);
                             }
     
                         }else{
                             vscode.window.showErrorMessage(`Converting of compilation unit to LLVM IR failed! Reason: ${bcError}`);
                         }
                     }else{
-                        vscode.window.showErrorMessage(`Linking of configured files failed!`);
+                        vscode.window.showErrorMessage(`Linking of configured files failed! See the Error-Log for further information`);
                     }
                 }
             }else{

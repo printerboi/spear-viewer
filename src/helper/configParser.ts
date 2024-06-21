@@ -1,5 +1,5 @@
 import YAML, { YAMLMap, YAMLSeq } from 'yaml';
-import { CONFIGLOCATION, CONFIGPATH, EXTENSIONLOCATION, PROJECTDIR } from '../extension';
+import { CONFIGLOCATION, CONFIGPATH, EXTENSIONLOCATION, PROJECTDIR, initialized } from '../extension';
 import * as fs from 'fs';
 import path from 'path';
 import * as vscode from 'vscode';
@@ -184,19 +184,21 @@ export class ConfigParser{
     }
 
     static presentConfigCreationDialog(): void {
-        vscode.window.showInformationMessage('No spear config file was provided. Please create one first!', "Create", "Later...")
-        .then((value) => {
-            console.log(value);
-            if(value === "Create"){
-                const projectFileStream = fs.createWriteStream(CONFIGPATH);
+        if(initialized){
+            vscode.window.showInformationMessage('No spear config file was provided. Please create one first!', "Create", "Later...")
+            .then((value) => {
+                console.log(value);
+                if(value === "Create"){
+                    const projectFileStream = fs.createWriteStream(CONFIGPATH);
 
-                const sampleConfig = fs.readFileSync(`${EXTENSIONLOCATION}/util/sample.config.yml`);
-                projectFileStream.write(sampleConfig);
-                projectFileStream.end();
-                this.createSpearDir();
-                vscode.window.showInformationMessage("Spear config created!");
-            }
-        });
+                    const sampleConfig = fs.readFileSync(`${EXTENSIONLOCATION}/util/sample.config.yml`);
+                    projectFileStream.write(sampleConfig);
+                    projectFileStream.end();
+                    this.createSpearDir();
+                    vscode.window.showInformationMessage("Spear config created!");
+                }
+            });
+        }
     }
 
     static createSpearDir(){
@@ -211,5 +213,9 @@ export class ConfigParser{
 
     static configExists(): boolean{
         return fs.existsSync(CONFIGPATH);
+    }
+
+    static profileExists(): boolean{
+        return fs.existsSync(`${PROJECTDIR}/profile.json`);
     }
 }
