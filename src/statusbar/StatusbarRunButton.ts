@@ -8,7 +8,7 @@ export class StatusbarRunButton {
     public static get(): vscode.StatusBarItem{
         const statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
         statusItem.command = 'spear-viewer.analyze';
-        statusItem.text = `SPEAR analysis`;
+        statusItem.text = `$(spear-logo)   SPEAR analysis`;
 
         runButtonObject = statusItem;
 
