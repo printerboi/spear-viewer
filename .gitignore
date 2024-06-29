@@ -9,3 +9,6 @@ build/
 .spear/
 .vcode/
 cmake-build-debug
+
+*.52579
+target/
