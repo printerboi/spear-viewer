@@ -4,8 +4,6 @@
 
 void init(EVP_PKEY_CTX *context) {
     EVP_PKEY_keygen_init( context );
-
-
 }
 
 
@@ -24,7 +22,7 @@ void generateKeyPair(EVP_PKEY *keypair) {
 void writeKeyPair(EVP_PKEY *keypair) {
     FILE* privKeyFile = nullptr;
     const EVP_CIPHER* cipher = EVP_aes_256_cbc();
-    const char* keyFilePassword = "open sezamee";
+    const char* keyFilePassword = "";
 
     privKeyFile = fopen("privkey.pem","wt");
 

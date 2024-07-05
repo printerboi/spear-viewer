@@ -6,8 +6,6 @@
 #include <sstream>
 
 
-std::pair<std::string, std::string> readInKeyPair();
-
 void encrypt(std::string plaintext);
 
-std::string decrypt(unsigned char * ciphertext);
+void writeOuput(std::string output);
