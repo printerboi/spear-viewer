@@ -1,6 +1,6 @@
 #! /bin/bash
 
-EXECUTEABLE="openssl-encrypt"
+EXECUTEABLE="sha256-calculator"
 
 if [ "$1" = "clean" ]; then
     if test -d target; then

@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
-project(gauss-seidel-solver)
+project(weather-data)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(gauss-seidel-solver
+add_executable(weather-data
         main.cpp
         includes/sensorInterface.cpp
         includes/sensorInterface.h
@@ -12,4 +12,4 @@ add_executable(gauss-seidel-solver
 )
 
 find_package(OpenSSL REQUIRED)
-target_link_libraries(gauss-seidel-solver OpenSSL::SSL)
+target_link_libraries(weather-data OpenSSL::SSL)

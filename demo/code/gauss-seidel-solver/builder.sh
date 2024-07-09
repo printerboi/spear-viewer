@@ -1,6 +1,6 @@
 #! /bin/bash
 
-EXECUTEABLE="openssl-encrypt"
+EXECUTEABLE="gauss-seidel-solver"
 
 if [ "$1" = "clean" ]; then
     if test -d target; then
@@ -18,9 +18,9 @@ elif [ "$1" = "profile" ]; then
         echo "Can't run profile, because the executeable does not exist! Run build first."
     fi
 elif [ "$1" = "build" ]; then
-    mkdir -p  target
-    cd target
-    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .. 
+    mkdir -p ./target
+    cd ./target
+    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ./.. 
     make
 else
     echo "Unknown subcommand! Usage:"
