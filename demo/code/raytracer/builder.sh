@@ -13,7 +13,8 @@ if [ "$1" = "clean" ]; then
 elif [ "$1" = "profile" ]; then
     if test target/$EXECUTEABLE; then
         cd target
-        valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes --collect-jumps=yes ./$EXECUTEABLE 
+        valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes --collect-jumps=yes --callgrind-out-file="callgrind-report" ./$EXECUTEABLE
+        kcachegrind ./callgrind-report
     else
         echo "Can't run profile, because the executeable does not exist! Run build first."
     fi
