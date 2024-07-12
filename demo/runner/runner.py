@@ -2,7 +2,7 @@ import os
 import subprocess
 import shlex
 import struct
-
+import numpy as np
 
 
 REPEATEDEXECUTIONS=5000
@@ -56,16 +56,18 @@ def execute(path, name, arg):
         else:
             builderPath = "{}/{}".format(path, name)
 
-        energy = 0.0
+        energyseries = list()
         for i in range(0, REPEATEDEXECUTIONS):
             energyBefore = readRapl()
             sub = subprocess.Popen(shlex.split(builderPath), cwd=path, stdout=open(os.devnull, 'wb'))
             sub.communicate()
             energyAfter = readRapl()
-            energy = energy + (energyAfter - energyBefore)
+            energyseries.append(energyAfter - energyBefore)
 
-        average = energy/REPEATEDEXECUTIONS
+        average = np.average(energyseries)
+        std_deviation = np.std(energyseries)
         print("\t\t ====> Programm used on average {}J per execution".format(average))
+        print("\t\t ====> Standard deviation {}J".format(std_deviation))
     else:
         print("Something went wrong. The path could not be found...")
 
