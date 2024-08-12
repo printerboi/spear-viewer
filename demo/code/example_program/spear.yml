@@ -1,0 +1,10 @@
+version: "1.0"
+name: Example
+analysis:
+  loopbound: 100
+  strategy: 'worst'
+  threshold: 0
+profiling:
+  iterations: 100
+files:
+  - main.cpp
