@@ -1,0 +1,14 @@
+A machine can be constructed to compute the sequence 010101....
+The machine is to have the four m-configurations " b " , " c " , " £ " , "c : >
+and is capable of printing " 0 " and " 1 ". The behaviour of the machine is
+described in the following table in which " R " means "the machine moves
+so that it scans the square immediately on the right of the one it was
+scanning previously". Similarly for "L". "E" means "the scanned
+symbol is erased" and " P " stands for "prints". This table (and all
+succeeding tables of the same kind) is to be understood to mean that for
+a configuration described in the first two columns the operations in the
+third column are carried out successively, and the machine then goes over
+into the m-configuration described in the last column. When the second
+column is left blank, it is understood that the behaviour of the third and
+fourth columns applies for any symbol and for no symbol. The machine
+starts in the m-configuration b with a blank tape.

@@ -3,3 +3,14 @@ dist
 node_modules
 .vscode-test/
 *.vsix
+
+build/
+.idea/
+.spear/
+.vcode/
+cmake-build-debug
+
+*.52579
+target/
+.pem
+.bin

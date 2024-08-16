@@ -14,6 +14,15 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "icons": {
+      "spear-logo": {
+        "description": "SPEAR logo",
+        "default": {
+          "fontPath": "media/SpearFont.woff",
+          "fontCharacter": "\\009A"
+        }
+      }
+    },
     "commands": [
       {
         "command": "spear-viewer.profile",
@@ -141,7 +150,7 @@
         {
           "id": "spearviewersidebar",
           "title": "SPEAR",
-          "icon": "media/lightning.svg"
+          "icon": "media/spear.svg"
         }
       ]
     },
