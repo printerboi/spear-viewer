@@ -12,7 +12,7 @@
     "Other"
   ],
   "activationEvents": [
-    "*"
+    "onLanguage:c++"
   ],
   "main": "./dist/extension.js",
   "contributes": {
