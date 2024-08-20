@@ -8,7 +8,6 @@ void init(EVP_PKEY_CTX *context) {
 
 
 void generateKeyPair(EVP_PKEY *keypair) {
-    // can change EVP_PKEY_RSA to something else here
     EVP_PKEY_CTX *context = EVP_PKEY_CTX_new_id( EVP_PKEY_RSA, nullptr );
 
     init(context);
