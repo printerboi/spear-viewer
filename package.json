@@ -4,7 +4,7 @@
   "description": "Display data from spear",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.83.0"
+    "vscode": "^1.92.2"
   },
   "repository": "https://github.com/printerboi/spear-viewer",
   "publisher": "Maximiliankrebs",

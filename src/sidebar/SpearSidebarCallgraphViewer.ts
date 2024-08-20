@@ -142,7 +142,7 @@ class GeneralItem extends vscode.TreeItem {
 
 class FunctionItem extends GeneralItem {
   constructor(public readonly node: CallGraphNode, energy: number, callGraph: Callgraph, functions: Array<string>, parent?: string, grandParent?: string) {
-    const energyString = `${energy.toFixed(3)} J in`;
+    const energyString = `${energy.toFixed(3)} J`;
     const isRecursion = (node.name === parent && node.name === grandParent);
     const hasChildren = !isRecursion && (functions.length > 0);
 

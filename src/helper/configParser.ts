@@ -186,7 +186,7 @@ export class ConfigParser{
     static presentConfigCreationDialog(): void {
         if(initialized){
             vscode.window.showInformationMessage('No spear config file was provided. Please create one first!', "Create", "Later...")
-            .then((value) => {
+            .then((value: any) => {
                 console.log(value);
                 if(value === "Create"){
                     const projectFileStream = fs.createWriteStream(CONFIGPATH);

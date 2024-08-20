@@ -48,61 +48,62 @@ export function activate(context: vscode.ExtensionContext) {
 
 			initialized = true;
 			OverviewProvider.refresh();
-
-
-			if(!fs.existsSync(CONFIGPATH)){
-				ConfigParser.presentConfigCreationDialog();
-			}
-			
-			context.subscriptions.push(
-				/**
-				 * Command to generate the graph for the currently open editor
-				 */
-				vscode.commands.registerCommand('spear-viewer.graph', async (params: GenerateGraphParameters) => {
-					generateGraph(params);
-				}),
-				
-	
-				/**
-				 * Profiles the device and saves the generated profile in the tempory directory of the application
-				 */
-				vscode.commands.registerCommand('spear-viewer.profile', async () => {
-					// [TODO]: Validate config here
-					profile();
-				}),
-	
-				vscode.commands.registerCommand('spear-viewer.analyze', async () => {
-					analyzeHandler();
-				}),
-	
-				vscode.window.registerTreeDataProvider("spearsidebar.analysisresult", OverviewProvider),
-
-				vscode.window.registerTreeDataProvider("spearsidebar.callgraph", CallgraphProvider),
-	
-				vscode.window.registerTreeDataProvider("spearsidebar.profile", ProfileProvider),
-	
-				vscode.commands.registerCommand('spear-viewer.profile.refreshEntry', () =>
-					ProfileProvider.refresh()
-				),
-
-				vscode.commands.registerCommand('spear-viewer.analysisresult.refreshEntry', () =>
-					OverviewProvider.refresh()
-				),
-
-				vscode.commands.registerCommand('spear-viewer.callgraph.refreshEntry', () =>
-					CallgraphProvider.refresh()
-				),
-	
-				/**
-				 * Opens a readonly editor and display the code with energy highlighting
-				 */
-				vscode.workspace.registerTextDocumentContentProvider("spearenergy", energyEditorProvider),
-
-				StatusbarRunButton.get()
-			);
-
-			StatusbarRunButton.update();
 		}
+		
+
+		if(!fs.existsSync(CONFIGPATH)){
+			ConfigParser.presentConfigCreationDialog();
+		}
+		
+		console.log('Adding commands...');
+		context.subscriptions.push(
+			/**
+			 * Command to generate the graph for the currently open editor
+			 */
+			vscode.commands.registerCommand('spear-viewer.graph', async (params: GenerateGraphParameters) => {
+				generateGraph(params);
+			}),
+			
+
+			/**
+			 * Profiles the device and saves the generated profile in the tempory directory of the application
+			 */
+			vscode.commands.registerCommand('spear-viewer.profile', async () => {
+				// [TODO]: Validate config here
+				profile();
+			}),
+
+			vscode.commands.registerCommand('spear-viewer.analyze', async () => {
+				analyzeHandler();
+			}),
+
+			vscode.window.registerTreeDataProvider("spearsidebar.analysisresult", OverviewProvider),
+
+			vscode.window.registerTreeDataProvider("spearsidebar.callgraph", CallgraphProvider),
+
+			vscode.window.registerTreeDataProvider("spearsidebar.profile", ProfileProvider),
+
+			vscode.commands.registerCommand('spear-viewer.profile.refreshEntry', () =>
+				ProfileProvider.refresh()
+			),
+
+			vscode.commands.registerCommand('spear-viewer.analysisresult.refreshEntry', () =>
+				OverviewProvider.refresh()
+			),
+
+			vscode.commands.registerCommand('spear-viewer.callgraph.refreshEntry', () =>
+				CallgraphProvider.refresh()
+			),
+
+			/**
+			 * Opens a readonly editor and display the code with energy highlighting
+			 */
+			vscode.workspace.registerTextDocumentContentProvider("spearenergy", energyEditorProvider),
+
+			StatusbarRunButton.get()
+		);
+
+		StatusbarRunButton.update();
 
 		if (activeEditor) {
 			triggerDecorationUpdate(true, activeEditor, context);
