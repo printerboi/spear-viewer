@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
-project(raytracer)
+project(task_6)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(raytracer main.cpp
+add_executable(task_6 main.cpp
         include/vec3.cpp
         include/vec3.h
         include/color.h

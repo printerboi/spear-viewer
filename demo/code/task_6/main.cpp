@@ -37,8 +37,6 @@ int main()
 
             auto pixel_color = camera.construct_ray_for_pixel(y, x).getColor(world);
             write_color(std::cout, pixel_color);
-
-            //std::cout << redValue << " " << greenValue << " " << blueValue << std::endl;
         }
     }
 

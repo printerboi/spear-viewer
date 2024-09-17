@@ -1,6 +1,6 @@
 #! /bin/bash
 
-EXECUTEABLE="weather-data"
+EXECUTEABLE="task_4"
 
 if [ "$1" = "clean" ]; then
     if test -d target; then

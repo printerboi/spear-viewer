@@ -1,5 +1,5 @@
 #include <iostream>
-#include "converter.h"
+#include "includes/converter.h"
 
 int main() {
     std::cout << "====== Temperature calculator ======" << std::endl;
@@ -8,12 +8,10 @@ int main() {
     std::cout << "\t 1) Fahrenheit to Celsius" << std::endl;
     std::cout << "\t 2) Celsius to Kelvin" << std::endl;
     std::cout << "\t 3) Fahrenheit to Celsius" << std::endl;
-    int mode;
-    double value;
+    int mode = 0;
+    double value = 255;
 
-    std::cin >> mode;
     std::cout << "Insert Value: ";
-    std::cin >> value;
 
     handler(mode, value);
 

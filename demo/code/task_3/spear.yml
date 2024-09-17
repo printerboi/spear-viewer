@@ -1,5 +1,5 @@
 version: "1.0"
-name: Gauss-Seidel solver config
+name: task_3 config
 analysis:
   loopbound: 100
   strategy: 'worst'
@@ -8,4 +8,4 @@ profiling:
   iterations: 100
 files:
   - main.cpp
-  - includes/solver.cpp
+  - includes/calculator.cpp

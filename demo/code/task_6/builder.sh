@@ -1,6 +1,6 @@
 #! /bin/bash
 
-EXECUTEABLE="raytracer"
+EXECUTEABLE="task_6"
 
 if [ "$1" = "clean" ]; then
     if test -d target; then

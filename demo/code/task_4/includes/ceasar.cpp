@@ -5,11 +5,15 @@ char rotate(char c, int shift) {
     char rotated = c;
 
     if (islower(c)) {
-        rotated = (c - 'a' + shift) % 26 + 'a';
+        char offset = 'a';
+        char base = c - offset;
+        char globaloffset = 'a';
+        rotated = (base + shift) % 26 + globaloffset;
     }
 
     if (isupper(c)) {
-        rotated = (c - 'A' + shift) % 26 + 'A';
+        char offset = 'A';
+        rotated = (c - 'A' + shift) % 26 + offset;
     }
 
     if (isdigit(c)) {
@@ -30,7 +34,3 @@ std::string encrypt(std::string plainText, int shift){
 
   return cipherText;
 }
-
-
-
-// 5+5+5+5-1-5
