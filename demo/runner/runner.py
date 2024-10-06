@@ -3,9 +3,10 @@ import subprocess
 import shlex
 import struct
 import numpy as np
+import matplotlib.pyplot as plt
 
 
-REPEATEDEXECUTIONS=5000
+REPEATEDEXECUTIONS=10000
 
 
 def readRapl():
@@ -64,68 +65,70 @@ def execute(path, name, arg):
             energyAfter = readRapl()
             energyseries.append(energyAfter - energyBefore)
 
-        average = np.average(energyseries)
-        std_deviation = np.std(energyseries)
-        print("\t\t ====> Programm used on average {}J per execution".format(average))
-        print("\t\t ====> Standard deviation {}J".format(std_deviation))
+        #average = np.average(energyseries)
+        #std_deviation = np.std(energyseries)
+        #maximum = np.max(energyseries)
+        #minimum = np.min(energyseries)
+        #print("\t\t ====> Programm used on average {} J per execution".format(average))
+        #print("\t\t ====> Standard deviation {} J".format(std_deviation))
+        #print("\t\t ====> Max {} J".format(maximum))
+        #print("\t\t ====> Min {} J".format(minimum))
+        return energyseries
     else:
         print("Something went wrong. The path could not be found...")
 
 
-print("Which democode should be run?")
-print("\t (1) Gauss-seidel solver")
-print("\t (2) OpenSSL encrypt")
-print("\t (3) OpenSSL handshake")
-print("\t (4) Raytracer")
-print("\t (5) SHA256 calculator")
-print("\t (6) Weather data")
+print("Path to tasks")
 
 democodeString = input()
-democodeNumber = int(democodeString) if democodeString.isdecimal() else None
 
-if democodeNumber and democodeNumber > 0 and democodeNumber <= 6:
-    if democodeNumber == 1:
-        print("Running demo {})".format(democodeNumber))
-        path = os.path.abspath("../code/gauss-seidel-solver")
+if democodeString:
+    tasks_used = list()
+    
+    for i in range (1,7,1):
+        task = f"task_{i}"
+        path = os.path.abspath(f"{democodeString}/{task}")
+        if os.path.exists(path):
+            tasks_used.append(task)
+    
+    fig, axs = plt.subplots(1, len(tasks_used), figsize=(15, 5))
+    i=1
+    for task in tasks_used:
+        path = os.path.abspath(f"{democodeString}/{task}")
+        print("Running {})".format(task))
         clean(path)
         compile(path)
-        execute(path, "target/gauss-seidel-solver", "")
+        edata = execute(path, f"target/{task}", "")
 
-    if democodeNumber == 2:
-        print("Running demo {})".format(democodeNumber))
-        path = os.path.abspath("../code/openssl-encrypt")
-        clean(path)
-        compile(path)
-        execute(path, "target/openssl-encrypt", "")
+        mean = np.mean(edata)
+        std_dev = np.std(edata)
+        print("\t-> Done!")
+        axs[i-1].boxplot(edata, showfliers=False)
+        axs[i-1].set_title(task)
+        axs[i-1].set_xlabel("Sample")
+        axs[i-1].set_ylabel("Energy used in J")
+        axs[i-1].plot(1, mean, 'ro')
+        axs[i-1].errorbar(1, mean, yerr=std_dev, fmt='o', color='red')
 
-    if democodeNumber == 3:
-        print("Running demo {})".format(democodeNumber))
-        path = os.path.abspath("../code/openssl-handshake")
-        clean(path)
-        compile(path)
-        execute(path, "target/openssl-handshake", "www.wikipedia.org")
+        i = i + 1
 
-    if democodeNumber == 4:
-        print("Running demo {})".format(democodeNumber))
-        path = os.path.abspath("../code/raytracer")
-        clean(path)
-        compile(path)
-        execute(path, "target/raytracer", "wikipedia.org")
+    # Creating plot
+    #mean = [np.mean(d) for d in data]
+    #std_devs = [np.std(d) for d in data]
 
-    if democodeNumber == 5:
-        print("Running demo {})".format(democodeNumber))
-        path = os.path.abspath("../code/sha256-calculator")
-        clean(path)
-        compile(path)
-        execute(path, "target/sha256-calculator", "")
+    #plt.boxplot(data, labels=labels, vert=True)
+    #for i in range(len(mean)):
+        #plt.plot(i + 1, mean[i], 'ro')
+    # Adds standard deviations as error bars
+    #for i in range(len(std_devs)):
+        #plt.errorbar(i + 1, mean[i], yerr=std_devs[i], fmt='o', color='red')
 
-    if democodeNumber == 6:
-        print("Running demo {})".format(democodeNumber))
-        path = os.path.abspath("../code/weather-data")
-        clean(path)
-        compile(path)
-        execute(path, "target/weather-data", "")
+    #plt.title(f"Execution of tasks using {REPEATEDEXECUTIONS} repeated executions")
+    #plt.xlabel('Task executed')
+    #plt.ylabel('Used energy in J')
 
-    print("\t-> Done!")
+    # show plot
+    plt.tight_layout()
+    plt.show()
 else:
     print("Please insert a number between 1 and 6")
