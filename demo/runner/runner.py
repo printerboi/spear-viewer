@@ -4,7 +4,7 @@ import shlex
 import struct
 import numpy as np
 import matplotlib.pyplot as plt
-
+import csv
 
 REPEATEDEXECUTIONS=10000
 
@@ -93,12 +93,15 @@ if democodeString:
     
     fig, axs = plt.subplots(1, len(tasks_used), figsize=(15, 5))
     i=1
+    dataagg={}
+
     for task in tasks_used:
         path = os.path.abspath(f"{democodeString}/{task}")
         print("Running {})".format(task))
         clean(path)
         compile(path)
         edata = execute(path, f"target/{task}", "")
+        dataagg[task]=edata
 
         mean = np.mean(edata)
         std_dev = np.std(edata)
@@ -111,6 +114,21 @@ if democodeString:
         axs[i-1].errorbar(1, mean, yerr=std_dev, fmt='o', color='red')
 
         i = i + 1
+
+    with open("result.csv", "w") as outfile:
+ 
+        # pass the csv file to csv.writer function.
+        writer = csv.writer(outfile)
+    
+        # pass the dictionary keys to writerow
+        # function to frame the columns of the csv file
+        writer.writerow(dataagg.keys())
+    
+        # make use of writerows function to append
+        # the remaining values to the corresponding
+        # columns using zip function.
+        writer.writerows(zip(*dataagg.values()))
+    
 
     # Creating plot
     #mean = [np.mean(d) for d in data]

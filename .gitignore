@@ -14,3 +14,5 @@ cmake-build-debug
 target/
 .pem
 .bin
+
+result.csv
