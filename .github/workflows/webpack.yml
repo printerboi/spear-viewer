@@ -31,19 +31,9 @@ jobs:
         npm install
         vsce package
 
-  release:
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-      - uses: actions/checkout@master
-      - name: Create release
-        uses: Roang-zero1/github-create-release-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Upload release artifacts
-        uses: Roang-zero1/github-upload-release-artifacts-action@v2
-        with:
-          args: "spear-viewer-*.vsix"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload actifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: extension
+        path: ./spear-viewer-*.vsix
+        if-no-files-found: error
