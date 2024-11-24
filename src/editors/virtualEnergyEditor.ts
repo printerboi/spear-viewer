@@ -1,4 +1,8 @@
-import { error } from "console";
+/**
+ * Defines a read only editor to enable the interaction with the calculated SPEAR analysis
+ * Author: Maximilian Krebs
+ */
+
 import * as vscode from "vscode";
 
 /**

@@ -1,11 +1,23 @@
+/**
+ * Defines a decoration handler that enables the interaction with the decorations of lines
+ * Author: Maximilian Krebs
+ */
+
 import * as vscode from 'vscode';
-import { graphDecorationType } from '../decorations/graphDecoration';
 import { AnalysisDecorationWrapper, AnalysisResult } from '../decorations/energyDecoration';
 import qs from 'querystring';
 import { AnalysisOptions, ConfigParser } from '../helper/configParser';
 
+// Define a timeout to be used to handle updates of decorations
 export let timeout: ReturnType<typeof setTimeout> | undefined = undefined;
 
+/**
+ * Decoration type to enable the interaction with the line decoration
+ */
+export const graphDecorationType = vscode.window.createTextEditorDecorationType({
+    light: {},
+    dark: {}
+});
 
 /**
  * Updates the decorations for the given vscode TextEditor
@@ -69,6 +81,7 @@ export async function updateDecorations(activeEditor: vscode.TextEditor | undefi
         }
     }
 
+    // If we have found functions...
     if(symbols){
         const information = symbols as vscode.SymbolInformation[];
 
@@ -82,30 +95,44 @@ export async function updateDecorations(activeEditor: vscode.TextEditor | undefi
             const parsed = symbol.name.match(/^[^(]+/);
             const parsedName = parsed? parsed[0]: null;
 
+            // If we could parse a function name
             if(parsedName){
+                // Construct the URI to activat the graph viewer
                 const graphCommandUri = vscode.Uri.parse(`command:spear-viewer.graph?${encodeURIComponent(JSON.stringify({ functionname: parsedName }))}`);
 
+                // Build the hover message
                 const hoverMessage = new vscode.MarkdownString(`[📈 Show energy graph](${graphCommandUri})`);
                 hoverMessage.isTrusted = true;
-
+                
+                // Construct the decoration in order to display the graph button to the user
                 const decoration = { range: new vscode.Range(symbol.location.range.start, new vscode.Position(symbol.location.range.start.line, 10)), hoverMessage: hoverMessage };
                 functionDefinitions.push(decoration);
             }
         });
 
+        // Set the decorations
         activeEditor.setDecorations(graphDecorationType, functionDefinitions);
     }
 }
 
+/**
+ * Function to recalculate the decorations on the given editor
+ * @param throttle If true reset the timeout
+ * @param activeEditor Active editor the decorations should be updated for
+ * @param context VSC context
+ */
 export function triggerDecorationUpdate(throttle = false, activeEditor: vscode.TextEditor | undefined, context: vscode.ExtensionContext) {
+    // If a timeout is defined...
     if(timeout){
         clearTimeout(timeout);
         timeout = undefined;
     }
 
+    // If the caller requests the initial start of the updater, set the timeout
     if(throttle){
         timeout = setTimeout(() => { updateDecorations(activeEditor, context); }, 1000);
     }else{
+        // Otherwise just update the current editor
         updateDecorations(activeEditor, context);
     }
 }

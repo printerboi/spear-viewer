@@ -1,3 +1,8 @@
+/**
+ * Functions to execute profile related operations
+ * Author: Maximilian Krebs
+ */
+
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { ProfileProvider, PROJECTDIR } from '../extension';

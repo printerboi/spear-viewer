@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as fs from 'fs';
 import * as path from 'path';
-import { PROJECTDIR, initialized } from '../extension';
+import { PROJECTDIR } from '../extension';
 import util from 'util';
 import { SETTINGS } from "../helper/extensionConstants";
 import { AnalysisOptions, ConfigParser, strategyToString } from "../helper/configParser";

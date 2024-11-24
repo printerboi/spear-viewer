@@ -1,8 +1,15 @@
+/**
+ * Energy decoration file. Handles the coloured energy highlights
+ * Author: Maximilian Krebs
+ * 
+ */
+
 import * as vscode from 'vscode';
 import { BADCOLOR, Color, GOODCOLOR, MEDIUMCOLOR, interpolate } from '../helper/colorHelper';
-import { SETTINGS } from '../helper/extensionConstants';
 
-
+/**
+ * Enum to encode the type of a node
+ */
 enum NodeType {
     UNDEFINED = 0,
     NODE = 1,
@@ -36,10 +43,16 @@ interface EnergyNode{
     instructions: Array<EnergyInstruction>
 }
 
+/**
+ * Define a Subgraph interface that represents a ProgramGraph inside LoopNodes
+ */
 interface Subgraph { 
     nodes: Array<EnergyNode | EnergyLoopNode>
 }
 
+/**
+ * Defines an interface to represent a LoopNode
+ */
 interface EnergyLoopNode{
     type: NodeType,
     repetitions: number,
@@ -91,15 +104,21 @@ export class AnalysisDecorationWrapper {
      */
     maxVal: number;
 
+    /**
+     * Context of vscode
+     */
     context: vscode.ExtensionContext;
 
+    /**
+     * Defines a energy threshold, which hides energy decorations with an energy value lower than the defined value
+     */
     threshold: number;
 
 
     /**
-     * 
-     * @param engjsn 
-     * @param relevantFile 
+     * Constructs the energyDecoration object
+     * @param engjsn JSON file containing the analysis result
+     * @param relevantFile Files set to be analysed via the SPEAR-Viewer config file
      */
     constructor(engjsn: any, relevantFile: string, context: vscode.ExtensionContext, threshold: number){
         // Intialize the analysis result and the relevant file for the wrapper
@@ -118,7 +137,6 @@ export class AnalysisDecorationWrapper {
 
         // Parse the analysis result
         this.parse();
-        console.log(this.lineEnergyMapping);
 
     }
 
@@ -128,10 +146,6 @@ export class AnalysisDecorationWrapper {
      * the relevantFile property of the object.
      */
     parse(){
-        //[TODO] We need to find a way that lines don't contain the doubled value of energy
-        // Currently the function will be calculated two times...the devil knows why...
-
-
         // Iterate over the EnergyFunction objects
         this.energyJson.functions.forEach((func) => {
             // Iterate over the contained EnergyNodes of the Energyfunction
@@ -149,6 +163,11 @@ export class AnalysisDecorationWrapper {
         });
     }
 
+    /**
+     * Select the method to be called in order to handle the given node type 
+     * @param node Node to be parsed
+     * @param multiplier Loop multiplier
+     */
     parseNode(node: EnergyNode | EnergyLoopNode, multiplier: number = 1){
         if(node.type === 1){
             const normalnode = node as EnergyNode;
@@ -161,6 +180,11 @@ export class AnalysisDecorationWrapper {
         }
     }
 
+    /**
+     * Parse a given node and calculate the energy
+     * @param normalnode Node to be parsed
+     * @param multiplier Loop multiplire
+     */
     parseNormalNode(normalnode: EnergyNode, multiplier: number = 1){
         // Iterate over the contained EnergyInstruction objects
         normalnode.instructions.forEach((inst: EnergyInstruction) => {
@@ -181,6 +205,11 @@ export class AnalysisDecorationWrapper {
         });
     }
 
+    /**
+     * Parse a given LoopNode
+     * @param loopnode LoopNode to be parsed
+     * @param multiplier LoopMultiplier
+     */
     parseLoopNode(loopnode: EnergyLoopNode, multiplier: number = 1){
         loopnode.subgraphs.forEach((subgraph: Subgraph) => {
             subgraph.nodes.forEach((node: EnergyNode | EnergyLoopNode) => {
@@ -239,13 +268,18 @@ export class AnalysisDecorationWrapper {
         return `rgba(${interpolatedColor.red}, ${interpolatedColor.green}, ${interpolatedColor.blue}, 0.7)`;
     }
 
-
+    /**
+     * Returns the actual gutter icon that highlights the energy used by the given line
+     * @param lineNumber The line number, the gutter icon will be displayed
+     * @returns A encoded svg object as URI to be displayed by vscode
+     */
     getGutterIcon(lineNumber: number): vscode.Uri | undefined{
         const THRESHOLD = this.threshold;
 
         if(THRESHOLD !== undefined){
+            // Check if the value of the line is above the defined threshold
             if(this.lineEnergyMapping[lineNumber] > THRESHOLD){
-                //const svg = '<svg width="32" height="48" viewPort="0 0 32 48" xmlns="http://www.w3.org/2000/svg"><polygon points="16,0 32,0 32,48 16,48" fill="' + this.getColor(lineNumber) + '" stroke="white" stroke-width="4"/></svg>';
+                // Construct the svg image that will be displayed in the line
                 const svg = `<svg width="10" height="15" viewBox="0 0 10 15" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="10" height="10" fill="${this.getColor(lineNumber)}" stroke="white" stroke-width="0"/></svg>`;
                 const icon = 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
                 return vscode.Uri.parse(icon);
