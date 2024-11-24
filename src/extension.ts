@@ -1,5 +1,3 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import generateGraph, { GenerateGraphParameters } from './subroutines/generateGraph';
@@ -13,33 +11,34 @@ import { StatusbarRunButton } from './statusbar/StatusbarRunButton';
 import { ConfigParser } from './helper/configParser';
 import { SpearSidebarCallgraphViewer } from './sidebar/SpearSidebarCallgraphViewer';
 
-//export let TMPDIR: string = "";
+
+// Init application wide path variables
 export let PROJECTDIR: string = "";
 export let CONFIGPATH: string = "";
 export let CONFIGLOCATION: string = "";
 export let EXTENSIONLOCATION: string = "";
 export let initialized: boolean = false;
 
+/**
+ * Init the UI components visible in the SPEAR tab
+ */
 export const ProfileProvider = new SpearSidebarProfileProvider();
 export const OverviewProvider = new SpearSidebarAnalysisFilesViewer();
 export const CallgraphProvider = new SpearSidebarCallgraphViewer();
 
 
-
-
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+/**
+ * Activation function to run on the activation of the extension
+ * Will also run if a new folder will be open
+ * @param context VSC context
+ */
 export function activate(context: vscode.ExtensionContext) {
-	console.log("Creating tmp dir...");
 	try {
-		//TMPDIR = fs.mkdtempSync(path.join(os.tmpdir(), APPPREFIX));
-		
-		// Use the console to output diagnostic information (console.log) and errors (console.error)
-		// This line of code will only be executed once when your extension is activated
-		console.log('Spear-viewer active!');
+		console.log('SPEAR-viewer active!');
 
 		let activeEditor = vscode.window.activeTextEditor;
 
+		// Define paths
 		if(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0){
 			CONFIGPATH = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/spear.yml`;
 			PROJECTDIR = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.spear`;
@@ -50,12 +49,12 @@ export function activate(context: vscode.ExtensionContext) {
 			OverviewProvider.refresh();
 		}
 		
-
+		
+		// Check if the current workspace includes a SPEAR-Viewer config. If not, present a dialog.
 		if(!fs.existsSync(CONFIGPATH)){
 			ConfigParser.presentConfigCreationDialog();
 		}
 		
-		console.log('Adding commands...');
 		context.subscriptions.push(
 			/**
 			 * Command to generate the graph for the currently open editor
@@ -69,55 +68,87 @@ export function activate(context: vscode.ExtensionContext) {
 			 * Profiles the device and saves the generated profile in the tempory directory of the application
 			 */
 			vscode.commands.registerCommand('spear-viewer.profile', async () => {
-				// [TODO]: Validate config here
 				profile();
 			}),
 
+			/**
+			 * Starts the analysis
+			 */
 			vscode.commands.registerCommand('spear-viewer.analyze', async () => {
 				analyzeHandler();
 			}),
 
+			/**
+			 * Registers a tree view for displaying analysed files
+			 */
 			vscode.window.registerTreeDataProvider("spearsidebar.analysisresult", OverviewProvider),
 
+			/**
+			 * Registers a tree view for displaying the energy call graph
+			 */
 			vscode.window.registerTreeDataProvider("spearsidebar.callgraph", CallgraphProvider),
 
+			/**
+			 * Registers a tree view for displaying profile information
+			 */
 			vscode.window.registerTreeDataProvider("spearsidebar.profile", ProfileProvider),
 
+			/**
+			 * Registers a command to allow for refreshment of profile information
+			 */
 			vscode.commands.registerCommand('spear-viewer.profile.refreshEntry', () =>
 				ProfileProvider.refresh()
 			),
 
+			/**
+			 * Registers a command to allow for refreshing the analysis result
+			 */
 			vscode.commands.registerCommand('spear-viewer.analysisresult.refreshEntry', () =>
 				OverviewProvider.refresh()
 			),
 
+			/** 
+			 * Registers a command to allow for refreshing the energy callgraph
+			 */
 			vscode.commands.registerCommand('spear-viewer.callgraph.refreshEntry', () =>
 				CallgraphProvider.refresh()
 			),
 
 			/**
-			 * Opens a readonly editor and display the code with energy highlighting
+			 * Register a readonly editor to display code with energy highlightings
 			 */
 			vscode.workspace.registerTextDocumentContentProvider("spearenergy", energyEditorProvider),
 
+			/**
+			 * Registers a button that enables users to run the analysis from the status bar
+			 */
 			StatusbarRunButton.get()
 		);
 
+		// Update the analysis button in the status bar
 		StatusbarRunButton.update();
 
 		if (activeEditor) {
 			triggerDecorationUpdate(true, activeEditor, context);
 		}
 
+		/**
+		 * Adds a text editor change listener to update the visible decorations if the user
+		 * opens a energy read only editor
+		 */
 		vscode.window.onDidChangeActiveTextEditor(editor => {
 			activeEditor = editor;
 			if (editor) {
 				triggerDecorationUpdate(false, activeEditor, context);
 			}
-
 			StatusbarRunButton.update();
 		}, null, context.subscriptions);
 	
+
+		/**
+		 * Adds a text editor change listener to update the visible decorations if the user
+		 * switches a energy read only editor
+		 */
 		vscode.workspace.onDidChangeTextDocument(event => {
 			if (activeEditor && event.document === activeEditor.document) {
 				triggerDecorationUpdate(true, activeEditor, context);
@@ -125,24 +156,16 @@ export function activate(context: vscode.ExtensionContext) {
 
 			StatusbarRunButton.update();
 		}, null, context.subscriptions);
-
-
 	}catch(e){
+		// Catch any error encoutered during the activation
 		console.error(e);
-		vscode.window.showErrorMessage('Error activating spear. A temporary directory could not be created!');
+		vscode.window.showErrorMessage('Error activating the SPEAR-Viewer. A temporary directory could not be created!');
 	}
 
 	
 }
 
-// This method is called when your extension is deactivated
-export function deactivate() {
-	/* try {
-		if (TMPDIR) {
-			fs.rmSync(TMPDIR, { recursive: true });
-		}
-	}
-	catch (e) {
-		vscode.window.showInformationMessage(`An error has occurred while removing the temporary directory at ${TMPDIR}. Please remove it manually. Error: ${e}`);
-	} */
-}
+/**
+ * Deactivation function
+ */
+export function deactivate() {}

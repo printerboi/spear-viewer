@@ -1,3 +1,8 @@
+/**
+ * Defines a functions to interact with the coloured energy program graph
+ * Author: Maximilian Krebs
+ */
+
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -16,7 +21,6 @@ export interface GenerateGraphParameters {
  * Generate the program graph for the currently open program
  */
 export default async function generateGraph(params: GenerateGraphParameters) {
-    // [TODO]: Validate config here
     const APPPATH = SETTINGS.getAPPPATH();
 
     // Check if the user has an open text editor

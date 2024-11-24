@@ -1,18 +1,25 @@
+/**
+ * Defines several helping constants for the extension
+ * Author: Maximilian Krebs
+ */
+
 import * as vscode from 'vscode';
 
-
+// Define the prefix used throughout the extension
 export const APPPREFIX = 'spear-viewer';
 
+// Define extension wide settings
 interface Settings {
     APPPATH: string | undefined;
     PROGRAMMSPATH: string | undefined;
     ITERATIONS: number | undefined;
-    THRESHOLD: number | undefined;
-    LOOPBOUND: number | undefined;
-    STRATEGY: string | undefined;
 }
 
 
+/**
+ * Settingsmanager to handle the interaction of the user with the 
+ * 
+ */
 export class SettingsManager{
     settings: Settings;
     configuration: vscode.WorkspaceConfiguration;
@@ -27,46 +34,41 @@ export class SettingsManager{
             APPPATH: this.configuration.get("apppath"),
             PROGRAMMSPATH: this.configuration.get("profile.programspath"),
             ITERATIONS: this.configuration.get("profile.iterations"),
-            THRESHOLD: this.configuration.get("analyze.threshold"),
-            LOOPBOUND: this.configuration.get("analyze.loopbound"),
-            STRATEGY: this.configuration.get("analyze.strategy"),
         };
     }
 
+    /**
+     * Refresh the configuration
+     */
     private refresh(): void {
         this.configuration = vscode.workspace.getConfiguration("spear-viewer");
         this.settings = this.populate();
     }
 
+    /**
+     * Get the APPPATH configuration value
+     */
     getAPPPATH(): string | undefined {
         this.refresh();
         return this.settings.APPPATH;
     }
 
+    /**
+     * Get the PROGRAMMPATH configuration value
+     */
     getPROGRAMMSPATH(): string | undefined {
         this.refresh();
         return this.settings.PROGRAMMSPATH;
     }
 
+    /**
+     * Get the ITERATIONS configuration value
+     */
     getITERATIONS(): number | undefined {
         this.refresh();
         return this.settings.ITERATIONS;
     }
 
-    getTHRESHOLD(): number | undefined {
-        this.refresh();
-        return this.settings.THRESHOLD;
-    }
-
-    getLOOPBOUND(): number | undefined {
-        this.refresh();
-        return this.settings.LOOPBOUND;
-    }
-
-    getSTRATEGY(): string | undefined {
-        this.refresh();
-        return this.settings.STRATEGY;
-    }
 }
 
 export const SETTINGS = new SettingsManager();
