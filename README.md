@@ -41,7 +41,7 @@ After downloading the file execute the following steps:
 
 After the installation of the SPEAR-Viewer you will see a new icon in the sidebar of Visual Studio Code
 
-![SPEAR icon in the sidebar](media/spear_icon_sidebar.png)
+![SPEAR icon in the sidebar](misc/images/spear_icon_sidebar.png)
 
 This icon will lead you to the SPEAR analysis hub for the current workspace. Here you can see the files under analysis, the call graph of the current program and calculate a profile.
 
@@ -75,7 +75,7 @@ Explanation of each option:
 
 After you have created a config, you should generate a profile to determine the energy consumption of your system. Switch to the SPEAR tab in the sidebar. There should be a section called "PROFILE". Hover with your mouse over the text until a "Play" symbol is revealed. See the following screenshot for an example:
 
-![SPEAR profile section](media/spear_profile.png)
+![SPEAR profile section](misc/images/spear_profile.png)
 
 Click the button to start the profiling. Be aware that the profiling itself needs elevated rights. After some time, the SPEAR-Viewer will tell you that your profile was generated, you are now ready to go. The generated `profile.json` can be found in SPEAR's project directory in the folder `.spear` which should was generated in your workspace/folder.
 
@@ -84,22 +84,22 @@ Click the button to start the profiling. Be aware that the profiling itself need
 After you have created a profile, you are well prepared for an analysis of your code. Make sure that the files you want to analyse are in the `files` section of the `spear.yml` config file.
 Start the analysis by clicking the "SPEAR analysis" button in the status bar:
 
-![SPEAR status bar button](media/spear_statusbar.png)
+![SPEAR status bar button](misc/images/spear_statusbar.png)
 
 The SPEAR-Viewer will automatically start the analysis on your defined files.
 After the analysis is complete, the generated `analysis.json` can also be found in the `.spear` project folder. The SPEAR tab will update and show you, the files added to the `files` section of your config file in the "Analysis" section. You can click any of these files. A read only editor will open showing you your code with energy highlights:
 
-![SPEAR colour markings](media/spear_color_markings.png)
+![SPEAR colour markings](misc/images/spear_color_markings.png)
 
 You can hover over the lines in the read only editor to see the absolute used energy.
 
 Additional information can be found in the "Callgraph" section of the SPEAR tab. If the analysis was executed correctly, you will see the call graph of the given program here. Additionally, each function is annotated with its energy cost:
 
-![SPEAR call graph](media/spear_callgraph.png)
+![SPEAR call graph](misc/images/spear_callgraph.png)
 
 We also added the possibility to render the internal programgraph that is used by SPEAR as a coloured graph, where each node will be annotated with its respective energy cost. To generate the graph, switch back to the normal editor, via the file explorer. Hover over the name of the function you want to generate the graph for. A tooltip will appear:
 
-![SPEAR energy graph](media/spear_energy_graph.png)
+![SPEAR energy graph](misc/images/spear_energy_graph.png)
 
 After clicking on the link "Show energy graph", the SPEAR-Viewer will open your standard pdf viewer and display the generated DOT graph.
 
