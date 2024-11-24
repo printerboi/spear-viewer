@@ -2,7 +2,7 @@
   "name": "spear-viewer",
   "displayName": "spear-viewer",
   "description": "Display data from spear",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.92.2"
   },
